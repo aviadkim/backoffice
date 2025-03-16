@@ -21,6 +21,21 @@ def render_sidebar():
         st.markdown("### הגדרות API")
         api_key = st.text_input("מפתח Gemini API", type="password", help="הזן את מפתח ה-API של Gemini כדי להפעיל תכונות AI")
         
+        # Store in session state
+        if api_key:
+            st.session_state.gemini_api_key = api_key
+            # Reinitialize agent runner if API key changed
+            if 'previous_api_key' not in st.session_state or st.session_state.previous_api_key != api_key:
+                st.session_state.previous_api_key = api_key
+                if 'agent_runner' in st.session_state:
+                    del st.session_state.agent_runner
+                try:
+                    from utils.agent_runner import FinancialAgentRunner
+                    st.session_state.agent_runner = FinancialAgentRunner(api_key)
+                    st.success("מערכת הסוכנים אותחלה בהצלחה!")
+                except Exception as e:
+                    st.error(f"שגיאה באתחול מערכת הסוכנים: {str(e)}")
+        
         st.markdown("<div style='height: 20px'></div>", unsafe_allow_html=True)
         
         # Options section

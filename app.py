@@ -44,7 +44,7 @@ def main():
     )
     
     # יצירת לשוניות
-    tabs = st.tabs(["📤 העלאה", "💰 עסקאות", "📊 ניתוח", "🤖 עוזר חכם"])
+    tabs = st.tabs(["📤 העלאה", "💰 עסקאות", "📊 ניתוח", "📝 דוחות", "🤖 עוזר חכם"])
     
     with tabs[0]:  # לשונית העלאה
         render_upload_tab()
@@ -55,7 +55,10 @@ def main():
     with tabs[2]:  # לשונית ניתוח
         render_analysis_tab()
     
-    with tabs[3]:  # לשונית עוזר AI
+    with tabs[3]:  # לשונית דוחות - NEW!
+        render_reports_tab()
+    
+    with tabs[4]:  # לשונית עוזר AI (now at index 4)
         render_assistant_tab(api_key=sidebar_state["api_key"])
 
 def render_upload_tab():
@@ -254,6 +257,36 @@ def render_assistant_tab(api_key=None):
             st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.warning("נא להזין מפתח API של Gemini בסרגל הצד כדי להפעיל את העוזר החכם")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+def render_reports_tab():
+    """הצגת לשונית דוחות."""
+    st.markdown('<div class="startup-card">', unsafe_allow_html=True)
+    st.subheader("דוחות פיננסיים")
+    
+    if 'transactions' not in st.session_state or not st.session_state.transactions:
+        st.info("אין נתונים פיננסיים זמינים. נא להעלות ולעבד מסמכים תחילה.")
+        st.markdown('</div>', unsafe_allow_html=True)
+        return
+    
+    # Simple interface to launch the full reports page
+    st.write("צור דוחות פיננסיים מקיפים בהתבסס על הנתונים הפיננסיים שלך.")
+    
+    report_options = st.selectbox(
+        "בחר סוג דוח",
+        ["סיכום חודשי", "ניתוח קטגוריות", "ניתוח מגמות", "דוח פיננסי מקיף"]
+    )
+    
+    if st.button("צור דוח", type="primary"):
+        # Redirect to full reports page
+        import webbrowser
+        webbrowser.open_new_tab("/reports")
+    
+    # Alternatively, show a sample or previously generated report
+    if 'current_report' in st.session_state:
+        with st.expander("תצוגה מקדימה של הדוח האחרון"):
+            st.markdown(st.session_state.current_report)
     
     st.markdown('</div>', unsafe_allow_html=True)
 

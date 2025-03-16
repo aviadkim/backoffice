@@ -5,13 +5,15 @@ import google.generativeai as genai
 class GeminiChatbot:
     def __init__(self, api_key=None):
         """Initialize Gemini chatbot"""
+        self.initialized = False
         if api_key:
-            genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel('gemini-pro')
-            self.chat = self.model.start_chat(history=[])
-            self.initialized = True
-        else:
-            self.initialized = False
+            try:
+                genai.configure(api_key=api_key)
+                self.model = genai.GenerativeModel('gemini-pro')
+                self.chat = self.model.start_chat(history=[])
+                self.initialized = True
+            except Exception as e:
+                print(f"Error initializing Gemini: {e}")
     
     def process_query(self, query: str, transactions=None):
         """Process user query using Gemini"""

@@ -41,33 +41,46 @@ def extract_transactions_from_text(text_results):
     """Extract transaction data from OCR text results."""
     transactions = []
     # Add pattern matching logic to identify dates, amounts, and descriptions
-    # This will depend on the structure of your financial documents
-    
-    # Example simple pattern (very basic, would need refinement):
     import re
-    date_pattern = r'\d{1,2}/\d{1,2}/\d{2,4}'
-    amount_pattern = r'[-+]?\d+[.,]\d{2}'
+    
+    # Patterns for Hebrew/English financial documents
+    date_pattern = r'\d{1,2}[/\.-]\d{1,2}[/\.-]\d{2,4}'
+    amount_pattern = r'[-+]?[\d,]+\.\d{2}'
     
     for text in text_results:
         lines = text.split('\n')
         for line in lines:
-            if re.search(amount_pattern, line):
-                # Basic parsing - would need to be customized for your documents
-                date = re.search(date_pattern, line)
-                amount = re.search(amount_pattern, line)
-                if date and amount:
-                    date_str = date.group(0)
-                    amount_str = amount.group(0).replace(',', '')
+            # Skip empty lines
+            if not line.strip():
+                continue
+                
+            # Look for amount pattern first as it's most distinctive
+            amount_match = re.search(amount_pattern, line)
+            if amount_match:
+                # Extract amount
+                amount_str = amount_match.group(0).replace(',', '')
+                amount = float(amount_str)
+                
+                # Look for date
+                date_match = re.search(date_pattern, line)
+                date_str = date_match.group(0) if date_match else ""
+                
+                # Extract description (text around the date and amount)
+                description = line
+                if date_match:
+                    description = description.replace(date_match.group(0), '')
+                if amount_match:
+                    description = description.replace(amount_match.group(0), '')
                     
-                    # Extract description (everything between date and amount)
-                    description = line.replace(date_str, '').replace(amount_str, '').strip()
-                    
-                    transactions.append({
-                        "date": date_str,
-                        "description": description,
-                        "amount": float(amount_str.replace(',', '.')),
-                        "category": "לא מסווג"  # Default category
-                    })
+                description = description.strip()
+                
+                # Add to transactions
+                transactions.append({
+                    "date": date_str,
+                    "description": description,
+                    "amount": amount,
+                    "category": "לא מסווג"  # Default category
+                })
     
     return transactions
 

@@ -216,6 +216,11 @@ def render_assistant_tab(api_key=None):
     st.subheader("עוזר פיננסי חכם")
     st.write("שאל שאלות לגבי הנתונים הפיננסיים שלך וקבל תובנות מיידיות.")
     
+    # Initialize the chatbot if not already done
+    if 'chatbot' not in st.session_state and api_key:
+        from utils.chatbot import GeminiChatbot
+        st.session_state.chatbot = GeminiChatbot(api_key=api_key)
+    
     user_query = st.text_input("שאל שאלה", placeholder="לדוגמה: מה הייתה ההוצאה הגדולה ביותר שלי?")
     
     if api_key:
@@ -223,18 +228,19 @@ def render_assistant_tab(api_key=None):
             if 'chat_history' not in st.session_state:
                 st.session_state.chat_history = []
             
-            # הוספת השאלה החדשה להיסטוריה
+            # Process new question
             if user_query and user_query.strip():
-                if 'transactions' not in st.session_state or not st.session_state.get('transactions'):
+                transactions = st.session_state.get('transactions', [])
+                if not transactions:
                     response = "נא להעלות ולעבד מסמך תחילה כדי שאוכל לענות על שאלות לגבי הנתונים הפיננסיים שלך."
                 else:
                     with st.spinner("מנתח..."):
-                        # כאן תבוא הלוגיקה של ניתוח באמצעות Gemini
-                        response = "בהתבסס על הנתונים, ההוצאה הגדולה ביותר שלך הייתה תשלום שכירות בסך ₪3,200"
+                        # Process with Gemini chatbot
+                        response = st.session_state.chatbot.process_query(user_query, transactions)
                 
                 st.session_state.chat_history.append({"user": user_query, "bot": response})
             
-            # הצגת היסטוריית הצ'אט בעיצוב מודרני
+            # Display chat history
             st.markdown('<div style="max-height: 400px; overflow-y: auto;">', unsafe_allow_html=True)
             for chat in st.session_state.chat_history:
                 st.markdown(f"""

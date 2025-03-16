@@ -1,0 +1,80 @@
+[
+    {
+        "date": "06/02/2023",
+        "description": "Salary Deposit",
+        "amount": 8500.0,
+        "category": "הכנסה"
+    },
+    {
+        "date": "06/05/2023",
+        "description": "Rent Payment",
+        "amount": -3200.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/10/2023",
+        "description": "Grocery Store",
+        "amount": -450.75,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/15/2023",
+        "description": "Internet Bill",
+        "amount": -89.99,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/17/2023",
+        "description": "Restaurant",
+        "amount": -125.4,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/20/2023",
+        "description": "Transfer from Savings",
+        "amount": 1000.0,
+        "category": "הכנסה"
+    },
+    {
+        "date": "06/22/2023",
+        "description": "Gas Station",
+        "amount": -65.3,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/25/2023",
+        "description": "Online Shopping",
+        "amount": -299.99,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/28/2023",
+        "description": "Electricity Bill",
+        "amount": -210.25,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "",
+        "description": "Starting Balance:",
+        "amount": 2450.0,
+        "category": "הכנסה"
+    },
+    {
+        "date": "",
+        "description": "Total Credits:",
+        "amount": 9500.0,
+        "category": "הכנסה"
+    },
+    {
+        "date": "",
+        "description": "Total Debits:",
+        "amount": -4441.68,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "",
+        "description": "Ending Balance:",
+        "amount": 7508.32,
+        "category": "הכנסה"
+    }
+]

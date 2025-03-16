@@ -1,0 +1,560 @@
+[
+    {
+        "date": "01/15/2025",
+        "description": "Salary Deposit",
+        "amount": 4894,
+        "category": "הכנסה"
+    },
+    {
+        "date": "02/01/2025",
+        "description": "Salary Deposit",
+        "amount": 5144,
+        "category": "הכנסה"
+    },
+    {
+        "date": "02/15/2025",
+        "description": "Salary Deposit",
+        "amount": 5146,
+        "category": "הכנסה"
+    },
+    {
+        "date": "03/01/2025",
+        "description": "Salary Deposit",
+        "amount": 4990,
+        "category": "הכנסה"
+    },
+    {
+        "date": "03/15/2025",
+        "description": "Salary Deposit",
+        "amount": 5225,
+        "category": "הכנסה"
+    },
+    {
+        "date": "01/15/2025",
+        "description": "Health Insurance",
+        "amount": -251,
+        "category": "בריאות"
+    },
+    {
+        "date": "01/18/2025",
+        "description": "Miscellaneous",
+        "amount": -460,
+        "category": "אחר"
+    },
+    {
+        "date": "01/19/2025",
+        "description": "Rent",
+        "amount": -507,
+        "category": "דיור"
+    },
+    {
+        "date": "01/21/2025",
+        "description": "Online Shopping",
+        "amount": -119,
+        "category": "קניות"
+    },
+    {
+        "date": "01/21/2025",
+        "description": "Investment Income",
+        "amount": 978,
+        "category": "הכנסה"
+    },
+    {
+        "date": "01/21/2025",
+        "description": "Takeout",
+        "amount": -281,
+        "category": "מזון"
+    },
+    {
+        "date": "01/23/2025",
+        "description": "Electronics",
+        "amount": -137,
+        "category": "קניות"
+    },
+    {
+        "date": "01/24/2025",
+        "description": "Gift",
+        "amount": 396,
+        "category": "הכנסה"
+    },
+    {
+        "date": "01/26/2025",
+        "description": "Restaurant",
+        "amount": -171,
+        "category": "מזון"
+    },
+    {
+        "date": "01/27/2025",
+        "description": "Car Maintenance",
+        "amount": -143,
+        "category": "תחבורה"
+    },
+    {
+        "date": "01/27/2025",
+        "description": "Car Payment",
+        "amount": -196,
+        "category": "תחבורה"
+    },
+    {
+        "date": "01/27/2025",
+        "description": "Miscellaneous",
+        "amount": -75,
+        "category": "אחר"
+    },
+    {
+        "date": "01/28/2025",
+        "description": "Miscellaneous",
+        "amount": -294,
+        "category": "אחר"
+    },
+    {
+        "date": "01/28/2025",
+        "description": "Charity",
+        "amount": -193,
+        "category": "אחר"
+    },
+    {
+        "date": "01/29/2025",
+        "description": "Gym",
+        "amount": -384,
+        "category": "בריאות"
+    },
+    {
+        "date": "01/29/2025",
+        "description": "Utilities",
+        "amount": -1305,
+        "category": "דיור"
+    },
+    {
+        "date": "01/29/2025",
+        "description": "Coffee Shop",
+        "amount": -95,
+        "category": "מזון"
+    },
+    {
+        "date": "01/30/2025",
+        "description": "Games",
+        "amount": -110,
+        "category": "בידור"
+    },
+    {
+        "date": "01/31/2025",
+        "description": "Travel",
+        "amount": -197,
+        "category": "אחר"
+    },
+    {
+        "date": "01/31/2025",
+        "description": "Subscriptions",
+        "amount": -69,
+        "category": "בידור"
+    },
+    {
+        "date": "02/01/2025",
+        "description": "Grocery",
+        "amount": -255,
+        "category": "מזון"
+    },
+    {
+        "date": "02/04/2025",
+        "description": "Investment Income",
+        "amount": 235,
+        "category": "הכנסה"
+    },
+    {
+        "date": "02/04/2025",
+        "description": "Car Payment",
+        "amount": -114,
+        "category": "תחבורה"
+    },
+    {
+        "date": "02/05/2025",
+        "description": "Restaurant",
+        "amount": -279,
+        "category": "מזון"
+    },
+    {
+        "date": "02/05/2025",
+        "description": "Salary",
+        "amount": 941,
+        "category": "הכנסה"
+    },
+    {
+        "date": "02/07/2025",
+        "description": "Salary",
+        "amount": 278,
+        "category": "הכנסה"
+    },
+    {
+        "date": "02/09/2025",
+        "description": "Games",
+        "amount": -326,
+        "category": "בידור"
+    },
+    {
+        "date": "02/09/2025",
+        "description": "Pharmacy",
+        "amount": -414,
+        "category": "בריאות"
+    },
+    {
+        "date": "02/12/2025",
+        "description": "Grocery",
+        "amount": -295,
+        "category": "מזון"
+    },
+    {
+        "date": "02/14/2025",
+        "description": "Miscellaneous",
+        "amount": -179,
+        "category": "אחר"
+    },
+    {
+        "date": "02/15/2025",
+        "description": "Miscellaneous",
+        "amount": -120,
+        "category": "אחר"
+    },
+    {
+        "date": "02/15/2025",
+        "description": "Property Tax",
+        "amount": -1809,
+        "category": "דיור"
+    },
+    {
+        "date": "02/16/2025",
+        "description": "Grocery",
+        "amount": -74,
+        "category": "מזון"
+    },
+    {
+        "date": "02/16/2025",
+        "description": "Clothing",
+        "amount": -402,
+        "category": "קניות"
+    },
+    {
+        "date": "02/16/2025",
+        "description": "Utilities",
+        "amount": -862,
+        "category": "דיור"
+    },
+    {
+        "date": "02/17/2025",
+        "description": "Clothing",
+        "amount": -184,
+        "category": "קניות"
+    },
+    {
+        "date": "02/18/2025",
+        "description": "Salary",
+        "amount": 606,
+        "category": "הכנסה"
+    },
+    {
+        "date": "02/18/2025",
+        "description": "Car Insurance",
+        "amount": -124,
+        "category": "תחבורה"
+    },
+    {
+        "date": "02/19/2025",
+        "description": "Investment Income",
+        "amount": 121,
+        "category": "הכנסה"
+    },
+    {
+        "date": "02/20/2025",
+        "description": "Clothing",
+        "amount": -331,
+        "category": "קניות"
+    },
+    {
+        "date": "02/20/2025",
+        "description": "Gas",
+        "amount": -150,
+        "category": "תחבורה"
+    },
+    {
+        "date": "02/21/2025",
+        "description": "Mortgage",
+        "amount": -1752,
+        "category": "דיור"
+    },
+    {
+        "date": "02/22/2025",
+        "description": "Travel",
+        "amount": -279,
+        "category": "אחר"
+    },
+    {
+        "date": "02/22/2025",
+        "description": "Public Transit",
+        "amount": -129,
+        "category": "תחבורה"
+    },
+    {
+        "date": "02/22/2025",
+        "description": "Health Insurance",
+        "amount": -423,
+        "category": "בריאות"
+    },
+    {
+        "date": "02/23/2025",
+        "description": "Home Repairs",
+        "amount": -1230,
+        "category": "דיור"
+    },
+    {
+        "date": "02/23/2025",
+        "description": "Health Insurance",
+        "amount": -71,
+        "category": "בריאות"
+    },
+    {
+        "date": "02/23/2025",
+        "description": "Gym",
+        "amount": -104,
+        "category": "בריאות"
+    },
+    {
+        "date": "02/24/2025",
+        "description": "Health Insurance",
+        "amount": -54,
+        "category": "בריאות"
+    },
+    {
+        "date": "02/24/2025",
+        "description": "Investment Income",
+        "amount": 98,
+        "category": "הכנסה"
+    },
+    {
+        "date": "02/26/2025",
+        "description": "Gas",
+        "amount": -170,
+        "category": "תחבורה"
+    },
+    {
+        "date": "02/27/2025",
+        "description": "Online Shopping",
+        "amount": -69,
+        "category": "קניות"
+    },
+    {
+        "date": "02/27/2025",
+        "description": "Car Payment",
+        "amount": -141,
+        "category": "תחבורה"
+    },
+    {
+        "date": "02/27/2025",
+        "description": "Home Insurance",
+        "amount": -1778,
+        "category": "דיור"
+    },
+    {
+        "date": "02/28/2025",
+        "description": "Gas",
+        "amount": -193,
+        "category": "תחבורה"
+    },
+    {
+        "date": "02/28/2025",
+        "description": "Gas",
+        "amount": -193,
+        "category": "תחבורה"
+    },
+    {
+        "date": "03/01/2025",
+        "description": "Freelance Work",
+        "amount": 536,
+        "category": "הכנסה"
+    },
+    {
+        "date": "03/01/2025",
+        "description": "Rent",
+        "amount": -1132,
+        "category": "דיור"
+    },
+    {
+        "date": "03/02/2025",
+        "description": "Games",
+        "amount": -66,
+        "category": "בידור"
+    },
+    {
+        "date": "03/03/2025",
+        "description": "Public Transit",
+        "amount": -167,
+        "category": "תחבורה"
+    },
+    {
+        "date": "03/03/2025",
+        "description": "Pharmacy",
+        "amount": -203,
+        "category": "בריאות"
+    },
+    {
+        "date": "03/03/2025",
+        "description": "Health Insurance",
+        "amount": -192,
+        "category": "בריאות"
+    },
+    {
+        "date": "03/04/2025",
+        "description": "Home Repairs",
+        "amount": -1443,
+        "category": "דיור"
+    },
+    {
+        "date": "03/04/2025",
+        "description": "Pharmacy",
+        "amount": -440,
+        "category": "בריאות"
+    },
+    {
+        "date": "03/04/2025",
+        "description": "Restaurant",
+        "amount": -48,
+        "category": "מזון"
+    },
+    {
+        "date": "03/05/2025",
+        "description": "Car Maintenance",
+        "amount": -113,
+        "category": "תחבורה"
+    },
+    {
+        "date": "03/05/2025",
+        "description": "Gift",
+        "amount": 967,
+        "category": "הכנסה"
+    },
+    {
+        "date": "03/05/2025",
+        "description": "Online Shopping",
+        "amount": -34,
+        "category": "קניות"
+    },
+    {
+        "date": "03/07/2025",
+        "description": "Furniture",
+        "amount": -66,
+        "category": "קניות"
+    },
+    {
+        "date": "03/07/2025",
+        "description": "Takeout",
+        "amount": -189,
+        "category": "מזון"
+    },
+    {
+        "date": "03/07/2025",
+        "description": "Takeout",
+        "amount": -28,
+        "category": "מזון"
+    },
+    {
+        "date": "03/08/2025",
+        "description": "Home Repairs",
+        "amount": -718,
+        "category": "דיור"
+    },
+    {
+        "date": "03/09/2025",
+        "description": "Coffee Shop",
+        "amount": -141,
+        "category": "מזון"
+    },
+    {
+        "date": "03/09/2025",
+        "description": "Coffee Shop",
+        "amount": -191,
+        "category": "מזון"
+    },
+    {
+        "date": "03/09/2025",
+        "description": "Health Insurance",
+        "amount": -353,
+        "category": "בריאות"
+    },
+    {
+        "date": "03/10/2025",
+        "description": "Car Maintenance",
+        "amount": -168,
+        "category": "תחבורה"
+    },
+    {
+        "date": "03/10/2025",
+        "description": "Concerts",
+        "amount": -308,
+        "category": "בידור"
+    },
+    {
+        "date": "03/11/2025",
+        "description": "Car Insurance",
+        "amount": -77,
+        "category": "תחבורה"
+    },
+    {
+        "date": "03/11/2025",
+        "description": "Gas",
+        "amount": -89,
+        "category": "תחבורה"
+    },
+    {
+        "date": "03/11/2025",
+        "description": "Car Maintenance",
+        "amount": -186,
+        "category": "תחבורה"
+    },
+    {
+        "date": "03/12/2025",
+        "description": "Travel",
+        "amount": -220,
+        "category": "אחר"
+    },
+    {
+        "date": "03/14/2025",
+        "description": "Freelance Work",
+        "amount": 502,
+        "category": "הכנסה"
+    },
+    {
+        "date": "03/14/2025",
+        "description": "Salary",
+        "amount": 644,
+        "category": "הכנסה"
+    },
+    {
+        "date": "03/14/2025",
+        "description": "Travel",
+        "amount": -299,
+        "category": "אחר"
+    },
+    {
+        "date": "03/15/2025",
+        "description": "Electronics",
+        "amount": -176,
+        "category": "קניות"
+    },
+    {
+        "date": "03/15/2025",
+        "description": "Restaurant",
+        "amount": -201,
+        "category": "מזון"
+    },
+    {
+        "date": "03/15/2025",
+        "description": "Gas",
+        "amount": -67,
+        "category": "תחבורה"
+    },
+    {
+        "date": "03/16/2025",
+        "description": "Car Maintenance",
+        "amount": -169,
+        "category": "תחבורה"
+    }
+]

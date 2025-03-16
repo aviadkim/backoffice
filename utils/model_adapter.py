@@ -7,11 +7,30 @@ logger = logging.getLogger(__name__)
 class GeminiAdapter:
     """Adapter to make Gemini models compatible with OpenAI's Agents SDK."""
     
-    def __init__(self, api_key, model_name="gemini-pro"):
+    def __init__(self, api_key, model_name="gemini-1.5-pro"):
         """Initialize the Gemini adapter."""
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel(model_name)
         self.history = []
+    
+    def generate_content(self, prompt, tools=None, **kwargs):
+        """Wrapper around Gemini's generate_content to handle tools."""
+        try:
+            if tools:
+                response = self.model.generate_content(
+                    prompt,
+                    generation_config={"temperature": kwargs.get("temperature", 0.7)},
+                    tools=tools
+                )
+            else:
+                response = self.model.generate_content(
+                    prompt,
+                    generation_config={"temperature": kwargs.get("temperature", 0.7)}
+                )
+            return response
+        except Exception as e:
+            logger.error(f"Error generating content: {str(e)}")
+            raise
     
     def create(self, messages, tools=None, **kwargs):
         """
@@ -73,6 +92,9 @@ class GeminiAdapter:
                 prompt += f"User: {content}\n\n"
             elif role == "assistant":
                 prompt += f"Assistant: {content}\n\n"
+            elif role == "function":
+                # Handle function messages for tool outputs
+                prompt += f"Function Result: {content}\n\n"
         
         if not prompt.endswith("Assistant: "):
             prompt += "Assistant: "
@@ -87,18 +109,15 @@ class GeminiAdapter:
             if tool.get("type") == "function" and "function" in tool:
                 function_spec = tool["function"]
                 
-                gemini_tool = {
+                function_declarations = [{
                     "name": function_spec.get("name", ""),
                     "description": function_spec.get("description", ""),
-                    "parameters": {
-                        "type": "object",
-                        "properties": function_spec.get("parameters", {}).get("properties", {}),
-                        "required": function_spec.get("parameters", {}).get("required", [])
-                    }
-                }
-                gemini_tools.append(gemini_tool)
+                    "parameters": function_spec.get("parameters", {})
+                }]
+                
+                gemini_tools = {"function_declarations": function_declarations}
         
-        return gemini_tools if gemini_tools else None
+        return [gemini_tools] if gemini_tools else None
     
     def _format_gemini_response(self, gemini_response, tools=None):
         """Format Gemini response to match OpenAI's response format."""
@@ -111,13 +130,15 @@ class GeminiAdapter:
             
             # Check if there's a function call in the response
             function_call = None
-            if tools and hasattr(gemini_response, "parts"):
-                for part in gemini_response.parts:
-                    if hasattr(part, "function_call") and part.function_call:
-                        function_call = {
-                            "name": part.function_call.name,
-                            "arguments": part.function_call.args
-                        }
+            if tools and hasattr(gemini_response, "candidates"):
+                for candidate in gemini_response.candidates:
+                    if hasattr(candidate, "content") and hasattr(candidate.content, "parts"):
+                        for part in candidate.content.parts:
+                            if hasattr(part, "function_call") and part.function_call:
+                                function_call = {
+                                    "name": part.function_call.name,
+                                    "arguments": json.dumps(part.function_call.args)
+                                }
             
             # Create the response object
             response_message = {

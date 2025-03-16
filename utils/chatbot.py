@@ -1,47 +1,41 @@
 import google.cloud.aiplatform as aiplatform
 import os
 import google.generativeai as genai
+import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 class GeminiChatbot:
+    """Chatbot powered by Google's Gemini model."""
+    
     def __init__(self, api_key=None):
         """Initialize Gemini chatbot"""
         self.initialized = False
         if api_key:
             try:
                 genai.configure(api_key=api_key)
-                self.model = genai.GenerativeModel('gemini-pro')
+                self.model = genai.GenerativeModel('gemini-1.5-pro')
                 self.chat = self.model.start_chat(history=[])
                 self.initialized = True
             except Exception as e:
-                print(f"Error initializing Gemini: {e}")
+                logger.error(f"Error initializing Gemini: {e}")
     
-    def process_query(self, query: str, transactions=None):
-        """Process user query using Gemini"""
+    def process_query(self, query, context=None):
+        """Process a user query and return a response."""
         if not self.initialized:
-            return "אנא הגדר מפתח API בהגדרות כדי להשתמש בעוזר החכם."
-        
-        context = ""
-        if transactions:
-            # Build financial context from transactions
-            total_income = sum(t['amount'] for t in transactions if t['amount'] > 0)
-            total_expenses = sum(t['amount'] for t in transactions if t['amount'] < 0)
-            
-            context = f"""
-            מידע פיננסי:
-            - סך הכל הכנסות: ₪{total_income:,.2f}
-            - סך הכל הוצאות: ₪{abs(total_expenses):,.2f}
-            - מאזן: ₪{(total_income + total_expenses):,.2f}
-            
-            פירוט עסקאות:
-            """
-            
-            for t in transactions[:10]:  # Limit to 10 transactions for context size
-                context += f"- {t['date']}: {t['description']} - ₪{t['amount']:,.2f} ({t['category']})\n"
-        
-        prompt = f"{context}\n\nשאלה: {query}\n\nתשובה בעברית:"
+            return "Chatbot is not initialized. Please provide a valid API key."
         
         try:
+            # Prepare context if provided
+            prompt = query
+            if context:
+                context_str = json.dumps(context, indent=2, ensure_ascii=False)
+                prompt = f"Consider the following financial data:\n\n{context_str}\n\nUser query: {query}"
+            
+            # Generate response
             response = self.chat.send_message(prompt)
             return response.text
         except Exception as e:
-            return f"שגיאה בתקשורת עם Gemini: {str(e)}"
+            logger.error(f"Error generating response: {e}")
+            return f"Sorry, I encountered an error: {str(e)}"

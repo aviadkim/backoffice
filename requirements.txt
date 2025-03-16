@@ -9,5 +9,5 @@ plotly>=5.13.0
 pdf2image>=1.16.0
 tabula-py>=2.3.0
 opencv-python>=4.5.5
-# agents-sdk==0.1.0  # OpenAI's Agents SDK - removed due to availability issues
-google-generativeai==0.3.1  # Gemini API
+google-generativeai>=0.3.1  # Gemini API
+markdown>=3.4.0  # For rendering markdown reports

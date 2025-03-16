@@ -1,63 +1,41 @@
-# FinAnalyzer - ניתוח פיננסי חכם
+# Financial Document Processing System (v1.1)
 
-![FinAnalyzer Logo](assets/images/logo.svg)
+מערכת לעיבוד מסמכים פיננסיים עם AI
 
-## סקירה כללית
-מערכת FinAnalyzer היא פלטפורמה מבוססת Streamlit לניתוח מסמכים פיננסיים באמצעות OCR ובינה מלאכותית. המערכת מאפשרת העלאת מסמכים פיננסיים (דפי חשבון, כרטיסי אשראי, דוחות), הפקת תובנות וקבלת המלצות מותאמות אישית.
+## תכונות
 
-## יכולות
-- 📊 ניתוח אוטומטי של מסמכים פיננסיים
-- 🔍 זיהוי טקסט באמצעות OCR מתקדם
-- 💰 עיבוד עסקאות וסיווג לקטגוריות
-- 📈 הצגה ויזואלית של דוחות והוצאות
-- 🤖 עוזר פיננסי חכם מבוסס AI של Gemini
+- עיבוד אוטומטי של מסמכים פיננסיים באמצעות OCR
+- חילוץ עסקאות פיננסיות ממסמכים
+- ניתוח דפוסי הוצאות וקבלת תובנות פיננסיות
+- עוזר חכם למענה על שאלות פיננסיות
+- יצירת דוחות מותאמים אישית
 
 ## התקנה
 
-### דרישות מקדימות
-- Python 3.8+
-- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) עם תמיכה בעברית
-- מפתח API של Gemini (לפונקציות AI)
-
-### צעדים להתקנה
-
-1. שיבוט המאגר:
-```bash
-git clone https://github.com/YOUR_USERNAME/finanalyzer.git
-cd finanalyzer
+1. התקן את הספריות הנדרשות:
 ```
-
-2. יצירת סביבה וירטואלית:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. התקנת התלויות:
-```bash
 pip install -r requirements.txt
 ```
 
-4. הפעלת האפליקציה:
-```bash
+2. צור קובץ `.env` בספריית הפרויקט והוסף את מפתח ה-API של Gemini:
+```
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+3. הפעל את האפליקציה:
+```
 streamlit run app.py
 ```
 
-## מבנה הפרויקט
-- `.streamlit/`: הגדרות Streamlit
-- `assets/`: קבצים סטטיים (תמונות, CSS)
-- `components/`: רכיבי UI לשימוש חוזר
-- `pages/`: דפי האפליקציה
-- `utils/`: פונקציות שירות
-- `models/`: מודלים ומבני נתונים
+## שימוש במערכת הסוכנים
 
-## תרומה לפרויקט
-תרומות לפרויקט מתקבלות בברכה! אנא צרו pull request או פתחו issue כדי לדון בשינויים מוצעים.
+המערכת משתמשת בסוכני AI מבוססי Gemini לעיבוד מסמכים ויצירת תובנות פיננסיות:
+
+1. **מעבד מסמכים פיננסיים** - מחלץ עסקאות ממסמכים
+2. **מנתח פיננסי** - מנתח דפוסי הוצאות
+3. **יועץ פיננסי** - מספק עצות פיננסיות מותאמות אישית
+4. **מחולל דוחות** - יוצר דוחות פיננסיים מקיפים
 
 ## רישיון
-[MIT License](LICENSE)
 
-## קרדיטים
-- נבנה עם [Streamlit](https://streamlit.io/)
-- OCR מופעל באמצעות [Tesseract](https://github.com/tesseract-ocr/tesseract)
-- יכולות AI מופעלות על ידי [Google Gemini](https://ai.google.dev/)
+כל הזכויות שמורות © 2023

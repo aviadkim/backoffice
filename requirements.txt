@@ -1,7 +1,7 @@
 streamlit>=1.24.0
 pillow>=9.0.0
 pytesseract>=0.3.10
-python-dotenv>=0.19.0
+python-dotenv>=1.0.0
 google-cloud-aiplatform>=1.25.0
 pandas>=1.5.0
 numpy>=1.23.0
@@ -9,3 +9,5 @@ plotly>=5.13.0
 pdf2image>=1.16.0
 tabula-py>=2.3.0
 opencv-python>=4.5.5
+# agents-sdk==0.1.0  # OpenAI's Agents SDK - removed due to availability issues
+google-generativeai==0.3.1  # Gemini API

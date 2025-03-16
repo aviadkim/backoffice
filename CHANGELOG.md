@@ -1,5 +1,19 @@
 # FinAnalyzer Changelog
 
+## Version 1.3.0 - Enhanced PDF Processing Module
+
+### New Features
+- **Advanced PDF Processing**: Added support for multiple global financial institutions
+  - Support for major global investment banks (JP Morgan, Goldman Sachs, etc.)
+  - Support for international brokerages (Interactive Brokers, Charles Schwab, etc.)
+  - Support for European and Asian financial institutions
+- **Improved Data Extraction**: Enhanced accuracy in extracting financial data from PDFs
+- **Multi-format Export System**: Added comprehensive export capabilities
+  - Excel export with multiple sheets and formatting
+  - CSV export with data categorization
+  - JSON export for raw data
+- **Enhanced Visualization Suite**: New visualization tools and improvements
+
 ## Version 1.2.0 - Securities Analysis Module
 
 ### New Features

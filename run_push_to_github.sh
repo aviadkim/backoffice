@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Utility script to help pushing FinAnalyzer v1.2.0 to GitHub from CodeSpaces
+# Utility script to help pushing FinAnalyzer v1.3.0 to GitHub from CodeSpaces
 
-echo "===== Preparing GitHub Push for FinAnalyzer v1.2.0 ====="
+echo "===== Preparing GitHub Push for FinAnalyzer v1.3.0 ====="
 
 # Check if git is installed
 if ! command -v git &> /dev/null; then
@@ -16,6 +16,10 @@ chmod +x push_to_github.sh
 # Make sure we're in the right directory
 cd /workspaces/backoffice
 
+# Update version number
+echo "Updating version to 1.3.0..."
+echo "1.3.0" > VERSION
+
 # Add all files to git staging
 echo "Adding files to git staging area..."
 git add .
@@ -26,7 +30,7 @@ git status
 
 # Commit the changes
 echo -e "\nCreating commit..."
-git commit -m "Release version 1.2.0 - Securities Analysis Module"
+git commit -m "Release version 1.3.0 - Enhanced PDF Processing Module"
 
 # Set up git credentials if needed
 if [ -z "$(git config --get user.name)" ]; then
@@ -53,6 +57,6 @@ echo -e "\nPushing to GitHub..."
 git push origin main
 
 echo -e "\n===== Process Complete ====="
-echo "FinAnalyzer v1.2.0 has been successfully pushed to GitHub!"
+echo "FinAnalyzer v1.3.0 has been successfully pushed to GitHub!"
 echo "You can continue working on it tomorrow."
 echo "Have a great day!"

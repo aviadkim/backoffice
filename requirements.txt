@@ -1,0 +1,23 @@
+streamlit>=1.24.0
+python-dotenv>=1.0.0
+google-generativeai>=0.3.1  # Gemini API
+pandas>=1.5.3
+numpy>=1.24.3
+plotly>=5.15.0
+pdfplumber>=0.10.2
+
+# Add missing dependencies
+tabula-py>=2.3.0
+pdf2image>=1.16.0
+pytesseract>=0.3.10
+opencv-python-headless>=4.5.5
+fpdf>=1.7.2
+
+# System dependencies for OpenCV and Tesseract
+# Install with: apt-get install -y $(cat requirements.txt)
+libgl1
+libglib2.0-0
+tesseract-ocr
+tesseract-ocr-eng
+tesseract-ocr-heb  # Add Hebrew language support
+poppler-utils      # Required for pdf2image

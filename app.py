@@ -61,37 +61,190 @@ def main():
     with tabs[4]:  # לשונית עוזר AI (now at index 4)
         render_assistant_tab(api_key=sidebar_state["api_key"])
 
+import tempfile
+import logging
+from utils.pdf_integration import pdf_processor
+
+logger = logging.getLogger(__name__)
+
 def render_upload_tab():
     """הצגת לשונית העלאת מסמכים."""
     st.markdown('<div class="startup-card">', unsafe_allow_html=True)
     st.subheader("העלאת מסמכים פיננסיים")
-    st.write("העלה דפי חשבון, חשבוניות או דוחות פיננסיים לניתוח.")
+    st.write("העלה דפי חשבון, חשבוניות, דוחות פיננסיים או דוחות ניירות ערך לניתוח.")
     
-    uploaded_file = st.file_uploader("בחר קובץ PDF או Excel", type=["pdf", "xlsx", "xls"])
+    # File uploader with multi-file support
+    uploaded_files = st.file_uploader(
+        "העלה קבצים לניתוח",
+        type=["pdf", "xlsx", "xls", "csv"],
+        accept_multiple_files=True,
+        help="ניתן להעלות מספר קבצים במקביל"
+    )
     
-    if uploaded_file:
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.write(f"**קובץ:** {uploaded_file.name}")
-        with col2:
+    if uploaded_files:
+        st.success(f"הועלו {len(uploaded_files)} קבצים")
+        
+        # Process files
+        process_col1, process_col2 = st.columns([3, 1])
+        
+        with process_col1:
+            # Document type selection
+            doc_type = st.selectbox(
+                "סוג מסמכים", 
+                ["אוטומטי", "דפי חשבון/עסקאות", "דוחות ניירות ערך"],
+                help="בחר את סוג המסמכים שהעלית כדי לקבל ניתוח מדויק יותר"
+            )
+            
+        with process_col2:
             st.markdown('<div style="height: 35px;"></div>', unsafe_allow_html=True)
-            if st.button("עבד מסמך", type="primary"):
-                # כאן תהיה הלוגיקה לעיבוד המסמך
-                st.success(f"המסמך {uploaded_file.name} עובד בהצלחה!")
+            if st.button("עבד מסמכים", type="primary"):
+                process_uploaded_files(uploaded_files, doc_type)
+        
+        # Show upload status
+        with st.expander("סטטוס העלאה"):
+            for file in uploaded_files:
+                st.write(f"- {file.name}")
     
     st.markdown('</div>', unsafe_allow_html=True)
-    
-    # אפשרויות לדוגמה
+    render_sample_section()
+
+def process_uploaded_files(files, doc_type):
+    """Process multiple uploaded files."""
+    with st.spinner("מעבד מסמכים..."):
+        all_results = []
+        
+        for file in files:
+            try:
+                # Convert document type
+                document_type = None
+                if doc_type == "דפי חשבון/עסקאות":
+                    document_type = "statement"
+                elif doc_type == "דוחות ניירות ערך":
+                    document_type = "securities"
+                
+                # Auto-detect if needed
+                if not document_type:
+                    document_type = pdf_processor.auto_detect_document_type(
+                        file.getvalue(),
+                        filename=file.name
+                    )
+                
+                # Process file
+                results, result_type = pdf_processor.process_financial_document(
+                    file.getvalue(),
+                    document_type=document_type
+                )
+                
+                if results:
+                    st.success(f"עובד בהצלחה: {file.name}")
+                    all_results.extend(results)
+                else:
+                    st.warning(f"לא נמצאו נתונים ב: {file.name}")
+                    
+            except Exception as e:
+                st.error(f"שגיאה בעיבוד {file.name}: {str(e)}")
+        
+        # Update session state with results
+        if all_results:
+            if document_type == "securities":
+                if 'securities_data' not in st.session_state:
+                    st.session_state.securities_data = []
+                st.session_state.securities_data.extend(all_results)
+            else:
+                if 'transactions' not in st.session_state:
+                    st.session_state.transactions = []
+                st.session_state.transactions.extend(all_results)
+            
+            st.success(f"סה\"כ עובדו {len(all_results)} רשומות")
+
+def render_sample_section():
+    """Render sample documents section."""
     st.markdown('<div class="startup-card">', unsafe_allow_html=True)
     st.subheader("או נסה מסמך לדוגמה")
+    
     sample_col1, sample_col2, sample_col3 = st.columns(3)
     
     with sample_col1:
-        st.button("דף חשבון בנק לדוגמה")
+        if st.button("דף חשבון לדוגמה"):
+            load_sample_document('bank_statement')
     with sample_col2:
-        st.button("דף כרטיס אשראי לדוגמה")
+        if st.button("כרטיס אשראי לדוגמה"):
+            load_sample_document('credit_card')
     with sample_col3:
-        st.button("דוח השקעות לדוגמה")
+        if st.button("דוח השקעות לדוגמה"):
+            load_sample_document('securities')
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+def handle_processing_results(filename, results, result_type):
+    """Handle the results of document processing."""
+    if not results:
+        st.error(f"שגיאה בעיבוד המסמך {filename}. נסה שוב או העלה קובץ אחר.")
+        return
+        
+    if result_type == 'transactions':
+        handle_transaction_results(filename, results)
+    elif result_type == 'securities':
+        handle_securities_results(filename, results)
+
+def handle_transaction_results(filename, results):
+    """Handle processed transaction results."""
+    if not results:
+        st.warning(f"המסמך {filename} עובד, אך לא נמצאו עסקאות.")
+        return
+        
+    if 'transactions' not in st.session_state:
+        st.session_state.transactions = []
+    
+    st.session_state.transactions.extend(results)
+    
+    # Try AI analysis if available
+    if 'agent_runner' in st.session_state and st.session_state.agent_runner:
+        try:
+            analysis = st.session_state.agent_runner.analyze_finances(results)
+            if analysis:
+                st.session_state.financial_analysis = analysis
+        except Exception as e:
+            st.warning(f"לא ניתן היה לנתח את העסקאות עם AI: {str(e)}")
+    
+    st.success(f"המסמך {filename} עובד בהצלחה! נמצאו {len(results)} עסקאות.")
+
+def handle_securities_results(filename, results):
+    """Handle processed securities results."""
+    if not results:
+        st.warning(f"המסמך {filename} עובד, אך לא נמצאו נתוני ניירות ערך.")
+        return
+        
+    if 'securities_data' not in st.session_state:
+        st.session_state.securities_data = []
+    
+    st.session_state.securities_data.extend(results)
+    st.success(f"המסמך {filename} עובד בהצלחה! נמצאו {len(results)} ניירות ערך.")
+    
+    if st.button("עבור לניתוח ניירות ערך"):
+        js = """
+        <script>
+        window.parent.document.querySelector('a[href="/06_securities"]').click();
+        </script>
+        """
+        st.markdown(js, unsafe_allow_html=True)
+
+def render_sample_documents():
+    """Render sample document section."""
+    st.markdown('<div class="startup-card">', unsafe_allow_html=True)
+    st.subheader("או נסה מסמך לדוגמה")
+    
+    sample_col1, sample_col2, sample_col3 = st.columns(3)
+    
+    with sample_col1:
+        if st.button("דף חשבון בנק לדוגמה"):
+            load_sample_document('bank_statement')
+    with sample_col2:
+        if st.button("דף כרטיס אשראי לדוגמה"):
+            load_sample_document('credit_card')
+    with sample_col3:
+        if st.button("דוח השקעות לדוגמה"):
+            load_sample_document('securities')
     
     st.markdown('</div>', unsafe_allow_html=True)
 

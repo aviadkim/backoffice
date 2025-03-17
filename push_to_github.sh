@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Script to push changes to GitHub
-echo "Pushing FinAnalyzer v1.5.0 to GitHub..."
+echo "Pushing FinAnalyzer v1.6.0 to GitHub..."
 
 # Make sure we're in the right directory
 cd /workspaces/backoffice
 
 # Update version file
-echo "1.5.0" > VERSION
+echo "1.6.0" > VERSION
 
 # Configure git if needed
 if [ -z "$(git config --get user.name)" ]; then
@@ -32,11 +32,11 @@ fi
 git add .
 
 # Commit the changes
-git commit -m "Release version 1.5.0 - Enhanced Securities Analysis Module"
+git commit -m "Release version 1.6.0 - Enhanced Securities Analysis Module"
 
 # Push to the main branch
 git push origin main
 
 echo "Push completed!"
-echo "FinAnalyzer v1.5.0 has been successfully pushed to GitHub."
+echo "FinAnalyzer v1.6.0 has been successfully pushed to GitHub."
 echo "View your repository at: https://github.com/aviadkim/backoffice"

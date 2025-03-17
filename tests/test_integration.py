@@ -1,6 +1,11 @@
-import unittest
+import sys
 import os
+import unittest
+from datetime import datetime
 import tempfile
+
+# Add project root to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pathlib import Path
 import pandas as pd
 from utils.pdf_integration import PDFProcessingIntegration

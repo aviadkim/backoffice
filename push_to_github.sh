@@ -23,6 +23,9 @@ fi
 # Configure repository if needed
 if ! git remote | grep -q "origin"; then
     git remote add origin https://github.com/aviadkim/backoffice.git
+else
+    # Update the remote URL to ensure it's correct
+    git remote set-url origin https://github.com/aviadkim/backoffice.git
 fi
 
 # Stage all changes

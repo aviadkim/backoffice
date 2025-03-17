@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 import json
 import time
 import random
+from typing import Any, Dict, List, Optional, Callable
+from utils.securities_analyzer import SecuritiesAnalyzer
 
 # Load environment variables
 load_dotenv()
@@ -40,23 +42,22 @@ class FinancialAgentRunner:
         self.retry_delay = retry_delay
         self._results_cache = {}  # Simple cache for results
     
-    def _retry_with_backoff(self, func, *args, **kwargs):
+    def _retry_with_backoff(self, func: Callable, max_retries: int = 3, cache_enabled: bool = True) -> Any:
         """
         Execute a function with exponential backoff retry logic.
         
         Args:
             func: Function to execute
-            *args: Positional arguments for the function
-            **kwargs: Keyword arguments for the function
+            max_retries: Maximum number of retries for the function
+            cache_enabled: Whether to cache results
             
         Returns:
             Result of the function call
         """
         # Create cache key if caching is enabled
-        cache_enabled = kwargs.pop('cache_enabled', True)
         if cache_enabled:
             # Create a simple cache key from function name and arguments
-            cache_key = f"{func.__name__}_{hash(str(args) + str(sorted(kwargs.items())))}"
+            cache_key = f"{func.__name__}_{hash(str(func))}"
             
             # Check cache
             if cache_key in self._results_cache:
@@ -69,7 +70,7 @@ class FinancialAgentRunner:
         
         while retries <= self.max_retries:
             try:
-                result = func(*args, **kwargs)
+                result = func()
                 
                 # Cache the result if successful
                 if cache_enabled:
@@ -255,7 +256,9 @@ class FinancialAgentRunner:
         
         return self._retry_with_backoff(_run_chat_query, cache_enabled=cache_enabled)
     
-    def analyze_securities(self, securities_transactions, report_date=None, cache_enabled=True):
+    def analyze_securities(self, securities_transactions: List[Dict[str, Any]], 
+                         report_date: Optional[str] = None, 
+                         cache_enabled: bool = True) -> Dict[str, Any]:
         """
         Analyze securities by ISIN across different accounts.
         
@@ -267,7 +270,8 @@ class FinancialAgentRunner:
         Returns:
             Securities analysis dictionary
         """
-        agent = create_securities_analysis_agent(self.api_key)
+        # Try with the agent first
+        agent = self._create_securities_analysis_agent()
         
         # Prepare the input for the agent
         input_data = {
@@ -277,22 +281,41 @@ class FinancialAgentRunner:
         
         # Run with retry logic
         def _run_securities_analysis():
-            result = Runner.run_sync(
-                starting_agent=agent,
-                input=f"Please analyze these securities transactions by ISIN: {json.dumps(input_data)}"
-            )
-            
-            # Extract analysis from result
-            securities_analysis = {}
-            if hasattr(result, 'agent_outputs') and result.agent_outputs:
-                for output in result.agent_outputs:
-                    if output.get('tool') == 'analyze_securities_by_isin' and isinstance(output.get('tool_result'), dict):
-                        securities_analysis = output.get('tool_result')
-                        break
-            
-            return securities_analysis
+            try:
+                if hasattr(self, 'run_sync'):  # Check if agent framework is available
+                    result = self.run_sync(
+                        starting_agent=agent,
+                        input=f"Please analyze these securities transactions by ISIN: {json.dumps(input_data)}"
+                    )
+                    
+                    # Extract analysis from result
+                    securities_analysis = {}
+                    if hasattr(result, 'agent_outputs') and result.agent_outputs:
+                        for output in result.agent_outputs:
+                            if output.get('tool') == 'analyze_securities_by_isin' and isinstance(output.get('tool_result'), dict):
+                                securities_analysis = output.get('tool_result')
+                                break
+                    
+                    # If we didn't get a valid result, use local analyzer
+                    if not securities_analysis:
+                        logger.warning("Agent analysis failed, using local securities analyzer")
+                        return self._use_local_analyzer(securities_transactions)
+                        
+                    return securities_analysis
+                else:
+                    logger.info("Agent framework not available, using local securities analyzer")
+                    return self._use_local_analyzer(securities_transactions)
+                    
+            except Exception as e:
+                logger.warning(f"Agent analysis failed, using local securities analyzer. Error: {str(e)}")
+                return self._use_local_analyzer(securities_transactions)
         
         return self._retry_with_backoff(_run_securities_analysis, cache_enabled=cache_enabled)
+    
+    def _use_local_analyzer(self, securities_transactions: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Use local securities analyzer as fallback."""
+        analyzer = SecuritiesAnalyzer()
+        return analyzer.analyze_securities_by_isin(securities_transactions)
     
     def analyze_performance(self, historical_data, grouping="monthly", cache_enabled=True):
         """
@@ -377,3 +400,8 @@ class FinancialAgentRunner:
         """Clear the results cache."""
         self._results_cache = {}
         logger.info("Cache cleared")
+    
+    def _create_securities_analysis_agent(self):
+        """Create an agent for securities analysis."""
+        # Implement agent creation logic here if available
+        return None

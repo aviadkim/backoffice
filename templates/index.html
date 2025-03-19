@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת לניתוח מסמכים פיננסיים</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .upload-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+        }
+        .file-input-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .file-input {
+            display: none;
+        }
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+        .results {
+            display: none;
+            margin-top: 20px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+        }
+        .tab.active {
+            border-bottom: 2px solid #2196F3;
+            color: #2196F3;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: right;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        .metadata {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .metadata-item {
+            margin: 5px 0;
+        }
+        .image-container {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .image-text {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .table-container {
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .table-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .metadata-item .label {
+            font-weight: bold;
+            color: #666;
+        }
+        .metadata-item .value {
+            color: #333;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .summary-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .summary-item .label {
+            display: block;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        .summary-item .value {
+            font-size: 1.2rem;
+            color: #333;
+        }
+        .transactions-table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .transactions-table th,
+        .transactions-table td {
+            padding: 0.75rem;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+        .transactions-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        .transactions-table tr:hover {
+            background: #f8f9fa;
+        }
+        #tables-container {
+            display: grid;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        .table-wrapper {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .table-wrapper h4 {
+            margin: 0 0 1rem 0;
+            color: #333;
+        }
+        #images-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .image-wrapper {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .image-wrapper img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .image-wrapper .image-text {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        #full-text {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            white-space: pre-wrap;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+        }
+        .progress-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease-in-out;
+        }
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>מערכת לניתוח מסמכים פיננסיים</h1>
+        
+        <div class="upload-section">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" accept=".pdf" required>
+                    <label for="fileInput" class="file-input-label">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>בחר קובץ PDF</span>
+                    </label>
+                </div>
+                <button type="submit" id="submitBtn" class="submit-btn" disabled>
+                    <i class="fas fa-upload"></i>
+                    העלה ונתח
+                </button>
+            </form>
+            <div id="progressContainer" class="progress-container" style="display: none;">
+                <div class="progress-bar">
+                    <div id="progressBar" class="progress-fill"></div>
+                </div>
+                <div id="progressText" class="progress-text">מעבד את הקובץ... אנא המתן...</div>
+            </div>
+        </div>
+        
+        <div class="loading">
+            מעבד את הקובץ... אנא המתן...
+        </div>
+        
+        <div class="error"></div>
+        
+        <div class="results-section" id="results" style="display: none;">
+            <div class="metadata">
+                <h3>פרטי מסמך</h3>
+                <div class="metadata-grid">
+                    <div class="metadata-item">
+                        <span class="label">שם קובץ:</span>
+                        <span class="value" id="filename"></span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="label">בנק:</span>
+                        <span class="value" id="bank-name"></span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="label">מספר חשבון:</span>
+                        <span class="value" id="account-number"></span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="label">תאריך מסמך:</span>
+                        <span class="value" id="statement-date"></span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="label">מטבע:</span>
+                        <span class="value" id="currency"></span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="label">מספר עמודים:</span>
+                        <span class="value" id="total-pages"></span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="label">גודל קובץ:</span>
+                        <span class="value" id="file-size"></span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="label">תאריך עיבוד:</span>
+                        <span class="value" id="processed-date"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('summary')">סיכום</button>
+                <button class="tab-button" onclick="switchTab('transactions')">תנועות</button>
+                <button class="tab-button" onclick="switchTab('tables')">טבלאות</button>
+                <button class="tab-button" onclick="switchTab('images')">תמונות</button>
+                <button class="tab-button" onclick="switchTab('text')">טקסט מלא</button>
+            </div>
+
+            <div class="tab-content active" id="summary-tab">
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="label">סה"כ הכנסות:</span>
+                        <span class="value" id="total-income"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">סה"כ הוצאות:</span>
+                        <span class="value" id="total-expenses"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">יתרה:</span>
+                        <span class="value" id="balance"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">מספר תנועות:</span>
+                        <span class="value" id="num-transactions"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="transactions-tab">
+                <div class="transactions-table-container">
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>תאריך</th>
+                                <th>תיאור</th>
+                                <th>סכום</th>
+                                <th>יתרה</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tables-tab">
+                <div id="tables-container"></div>
+            </div>
+
+            <div class="tab-content" id="images-tab">
+                <div id="images-container"></div>
+            </div>
+
+            <div class="tab-content" id="text-tab">
+                <pre id="full-text"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const uploadForm = document.getElementById('uploadForm');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const results = document.getElementById('results');
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            // Handle file selection
+            fileInput.addEventListener('change', function() {
+                submitBtn.disabled = !this.files.length;
+            });
+
+            // Handle form submission
+            uploadForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // Show progress container
+                progressContainer.style.display = 'block';
+                submitBtn.disabled = true;
+                results.style.display = 'none';
+
+                // Start progress polling
+                let progressInterval = setInterval(() => {
+                    fetch('/progress')
+                        .then(response => response.json())
+                        .then(data => {
+                            progressBar.style.width = `${data.progress}%`;
+                            progressText.textContent = data.message;
+                            
+                            if (data.status === 'success' || data.status === 'error') {
+                                clearInterval(progressInterval);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error checking progress:', error);
+                            clearInterval(progressInterval);
+                        });
+                }, 1000);
+
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    clearInterval(progressInterval);
+                    
+                    if (data.status === 'success') {
+                        progressBar.style.width = '100%';
+                        progressText.textContent = 'הקובץ עובד בהצלחה!';
+                        displayResults(data.content);
+                        results.style.display = 'block';
+                    } else {
+                        progressBar.style.backgroundColor = '#f44336';
+                        progressText.textContent = `שגיאה: ${data.error}`;
+                    }
+                })
+                .catch(error => {
+                    clearInterval(progressInterval);
+                    progressBar.style.backgroundColor = '#f44336';
+                    progressText.textContent = `שגיאה: ${error.message}`;
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                });
+            });
+
+            // Handle tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+
+            function displayResults(data) {
+                // Display metadata
+                document.getElementById('filename').textContent = data.filename;
+                document.getElementById('bank-name').textContent = data.metadata?.bank_name || 'לא זוהה';
+                document.getElementById('account-number').textContent = data.metadata?.account_number || 'לא נמצא';
+                document.getElementById('statement-date').textContent = data.metadata?.statement_date || 'לא נמצא';
+                document.getElementById('currency').textContent = data.metadata?.currency || 'ILS';
+                document.getElementById('total-pages').textContent = data.metadata?.total_pages || 0;
+                document.getElementById('file-size').textContent = formatFileSize(data.metadata?.file_size || 0);
+                document.getElementById('processed-date').textContent = new Date(data.metadata?.processed_date).toLocaleString('he-IL');
+
+                // Display summary
+                document.getElementById('total-income').textContent = formatAmount(data.summary.total_income, data.metadata?.currency);
+                document.getElementById('total-expenses').textContent = formatAmount(data.summary.total_expenses, data.metadata?.currency);
+                document.getElementById('balance').textContent = formatAmount(data.summary.balance, data.metadata?.currency);
+                document.getElementById('num-transactions').textContent = data.summary.num_transactions;
+
+                // Display transactions
+                const transactionsBody = document.getElementById('transactions-body');
+                transactionsBody.innerHTML = '';
+                data.transactions.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${formatDate(transaction.date)}</td>
+                        <td>${transaction.description}</td>
+                        <td>${formatAmount(transaction.amount, data.metadata?.currency)}</td>
+                        <td>${transaction.balance ? formatAmount(transaction.balance, data.metadata?.currency) : '-'}</td>
+                    `;
+                    transactionsBody.appendChild(row);
+                });
+
+                // Display tables
+                const tablesContainer = document.getElementById('tables-container');
+                tablesContainer.innerHTML = '';
+                data.tables.forEach((table, index) => {
+                    const tableWrapper = document.createElement('div');
+                    tableWrapper.className = 'table-wrapper';
+                    tableWrapper.innerHTML = `
+                        <h4>טבלה ${index + 1} (עמוד ${table.page_number})</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>${table.headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody>
+                                ${table.rows.map(row => `
+                                    <tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    tablesContainer.appendChild(tableWrapper);
+                });
+
+                // Display images
+                const imagesContainer = document.getElementById('images-container');
+                imagesContainer.innerHTML = '';
+                data.images.forEach((image, index) => {
+                    const imageWrapper = document.createElement('div');
+                    imageWrapper.className = 'image-wrapper';
+                    imageWrapper.innerHTML = `
+                        <h4>תמונה ${index + 1} (עמוד ${image.page_number})</h4>
+                        ${image.text ? `<div class="image-text">${image.text}</div>` : ''}
+                        ${image.tables.length > 0 ? `
+                            <div class="image-tables">
+                                ${image.tables.map((table, tableIndex) => `
+                                    <div class="table-wrapper">
+                                        <h5>טבלה ${tableIndex + 1}</h5>
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>${table.headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                                            </thead>
+                                            <tbody>
+                                                ${table.rows.map(row => `
+                                                    <tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    `;
+                    imagesContainer.appendChild(imageWrapper);
+                });
+
+                // Display full text
+                document.getElementById('full-text').textContent = data.text;
+
+                // Show results section
+                document.getElementById('results').style.display = 'block';
+            }
+
+            function formatAmount(amount, currency = 'ILS') {
+                return new Intl.NumberFormat('he-IL', {
+                    style: 'currency',
+                    currency: currency
+                }).format(amount);
+            }
+
+            function formatDate(dateStr) {
+                return new Date(dateStr).toLocaleDateString('he-IL');
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+        });
+    </script>
+</body>
+</html> 

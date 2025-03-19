@@ -1,0 +1,64 @@
+name: generic_bank_template
+institution: Generic Bank
+document_type: statement
+fields:
+  - name: security_name
+    field_type: string
+    required: true
+    patterns:
+      - '(?:security|bond|stock|fund|etf|share)[\s:]+([A-Za-z0-9\s.,&\'-]+)'
+      - '([A-Za-z0-9\s.,&\'-]{3,50})\s+[A-Z]{2}[A-Z0-9]{10}'
+    validation_rules: []
+    
+  - name: isin
+    field_type: string
+    required: true
+    patterns:
+      - '[A-Z]{2}[A-Z0-9]{10}'
+    validation_rules:
+      - type: regex
+        pattern: '^[A-Z]{2}[A-Z0-9]{10}$'
+        
+  - name: quantity
+    field_type: float
+    required: false
+    patterns:
+      - 'quantity[\s:]+(\d+(?:,\d+)?(?:\.\d+)?)'
+      - 'shares[\s:]+(\d+(?:,\d+)?(?:\.\d+)?)'
+    validation_rules:
+      - type: range
+        min: 0
+        
+  - name: price
+    field_type: float
+    required: false
+    patterns:
+      - 'price[\s:]+[$€£]?\s*(\d+(?:,\d+)?(?:\.\d+)?)'
+      - 'rate[\s:]+[$€£]?\s*(\d+(?:,\d+)?(?:\.\d+)?)'
+    validation_rules:
+      - type: range
+        min: 0
+        
+  - name: market_value
+    field_type: float
+    required: false
+    patterns:
+      - 'market[\s:]+value[\s:]+[$€£]?\s*(\d+(?:,\d+)?(?:\.\d+)?)'
+      - 'value[\s:]+[$€£]?\s*(\d+(?:,\d+)?(?:\.\d+)?)'
+    validation_rules:
+      - type: range
+        min: 0
+
+layout_markers:
+  header:
+    - "Securities Statement"
+    - "Portfolio Summary"
+    - "Holdings Detail"
+  footer:
+    - "End of Statement"
+    - "Page [0-9]+ of [0-9]+"
+
+sample_identifiers:
+  - "statement"
+  - "portfolio"
+  - "securities"

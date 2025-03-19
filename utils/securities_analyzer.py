@@ -150,6 +150,15 @@ class SecuritiesAnalyzer:
             # Convert to DataFrame for easier analysis
             df = pd.DataFrame(historical_data)
             
+            # Calculate total market value if not present
+            if 'market_value' in df.columns and 'total_market_value' not in df.columns:
+                df['total_market_value'] = df['market_value']
+            elif 'quantity' in df.columns and 'price' in df.columns:
+                df['total_market_value'] = df['quantity'] * df['price']
+                
+            if 'total_market_value' not in df.columns:
+                return {'status': 'error', 'message': 'Could not calculate total market value'}
+            
             # Ensure date column is datetime
             if 'date' in df.columns:
                 df['date'] = pd.to_datetime(df['date'])
@@ -160,7 +169,7 @@ class SecuritiesAnalyzer:
             if grouping == 'monthly':
                 df['period'] = df['date'].dt.strftime('%Y-%m')
             elif grouping == 'quarterly':
-                df['period'] = df['date'].dt.year.astype(str) + '-Q' + (df['date'].dt.quarter).astype(str)
+                df['period'] = df['date'].dt.year.astype(str) + '-Q' + df['date'].dt.quarter.astype(str)
             elif grouping == 'yearly':
                 df['period'] = df['date'].dt.year
             else:
@@ -176,7 +185,6 @@ class SecuritiesAnalyzer:
             period_summary['change'] = period_summary['total_market_value'] - period_summary['prev_value']
             period_summary['percent_change'] = (period_summary['change'] / period_summary['prev_value']) * 100
             
-            # Calculate performance metrics
             performance_by_period = period_summary.to_dict('records')
             
             # Securities performance for each security
@@ -192,7 +200,7 @@ class SecuritiesAnalyzer:
                 security_by_period = security_data.groupby('period').agg({
                     'price': 'last',
                     'quantity': 'last',
-                    'market_value': 'last'
+                    'total_market_value': 'last'
                 }).reset_index()
                 
                 # Calculate period-over-period changes

@@ -12,98 +12,50 @@ import re
 
 logger = logging.getLogger(__name__)
 
-def extract_text_from_pdf(pdf_path: str) -> list:
-    """
-    Extract text from a PDF file.
+def extract_text_from_pdf(file_path: str, start_page: int = 0, max_pages: Optional[int] = None) -> Tuple[List[Any], str]:
+    """Extract text and tables from PDF file.
     
     Args:
-        pdf_path: Path to the PDF file
+        file_path: Path to PDF file
+        start_page: Starting page number (0-based)
+        max_pages: Maximum number of pages to process
         
     Returns:
-        List of dictionaries containing extracted text and metadata
+        Tuple of (content, content_type) where:
+        - content is list of extracted text/tables
+        - content_type is 'text' or 'table'
     """
     try:
-        with pdfplumber.open(pdf_path) as pdf:
-            extracted_data = []
+        with pdfplumber.open(file_path) as pdf:
+            content = []
+            content_type = 'text'  # Default to text
             
-            for page in pdf.pages:
-                text = page.extract_text()
-                if text:
-                    # Process text based on content
-                    if 'Bank Statement' in text:
-                        # Extract transactions and balance
-                        transactions = []
-                        balance = None
+            # Calculate page range
+            total_pages = len(pdf.pages)
+            if max_pages:
+                end_page = min(start_page + max_pages, total_pages)
+            else:
+                end_page = total_pages
+                
+            for page_num in range(start_page, end_page):
+                page = pdf.pages[page_num]
+                
+                # Try to extract tables first
+                tables = page.extract_tables()
+                if tables:
+                    content.extend(tables)
+                    content_type = 'table'
+                else:
+                    # If no tables, extract text
+                    text = page.extract_text()
+                    if text:
+                        content.append(text)
                         
-                        for line in text.split('\n'):
-                            # Try to find balance
-                            balance_match = re.search(r'Balance:\s*\$(\d+(?:,\d+)?(?:\.\d+)?)', line)
-                            if balance_match:
-                                balance = float(balance_match.group(1).replace(',', ''))
-                                
-                            # Try to find transaction
-                            date_match = re.search(r'Date:\s*(\d{4}-\d{2}-\d{2})', line)
-                            if date_match:
-                                transaction = {'date': date_match.group(1)}
-                                
-                                # Try to find description
-                                desc_match = re.search(r'Description:\s*(.+?)(?=Amount:|Balance:|$)', line)
-                                if desc_match:
-                                    transaction['description'] = desc_match.group(1).strip()
-                                
-                                # Try to find amount
-                                amount_match = re.search(r'Amount:\s*\$([-]?\d+(?:,\d+)?(?:\.\d+)?)', line)
-                                if amount_match:
-                                    transaction['amount'] = float(amount_match.group(1).replace(',', ''))
-                                
-                                transactions.append(transaction)
-                        
-                        extracted_data.append({
-                            'type': 'bank_statement',
-                            'transactions': transactions,
-                            'balance': balance
-                        })
-                        
-                    elif 'Performance Report' in text:
-                        # Extract performance data
-                        performance_data = []
-                        
-                        for line in text.split('\n'):
-                            period_match = re.search(r'Period:\s*(.+)', line)
-                            if period_match:
-                                period = {
-                                    'period': period_match.group(1).strip()
-                                }
-                                
-                                # Try to find return
-                                return_match = re.search(r'Return:\s*([-]?\d+(?:\.\d+)?)', line)
-                                if return_match:
-                                    period['return'] = float(return_match.group(1))
-                                
-                                # Try to find annual return
-                                annual_match = re.search(r'Annual Return:\s*([-]?\d+(?:\.\d+)?)', line)
-                                if annual_match:
-                                    period['annual_return'] = float(annual_match.group(1))
-                                
-                                performance_data.append(period)
-                        
-                        extracted_data.append({
-                            'type': 'performance_report',
-                            'periods': performance_data
-                        })
-                    
-                    else:
-                        # Generic text extraction
-                        extracted_data.append({
-                            'type': 'text',
-                            'content': text
-                        })
-            
-            return extracted_data
+            return content, content_type
             
     except Exception as e:
         logger.error(f"Error extracting text from PDF: {str(e)}", exc_info=True)
-        return []
+        return [], 'error'
 
 def extract_tables(pdf_path: str, pages: Optional[str] = 'all', 
                   progress_callback: Optional[Callable] = None) -> List[pd.DataFrame]:

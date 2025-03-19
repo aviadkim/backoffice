@@ -19,7 +19,8 @@ class PDFProcessingIntegration:
         self,
         file_path_or_bytes: Union[str, bytes, BinaryIO],
         document_type: Optional[str] = None,
-        max_pages: Optional[int] = None
+        max_pages: Optional[int] = None,
+        callback: Optional[Callable[[int, int, str], None]] = None
     ) -> Tuple[List[Dict[str, Any]], str]:
         """
         Process a financial document to extract data.
@@ -28,10 +29,14 @@ class PDFProcessingIntegration:
             file_path_or_bytes: File path or bytes content of the file
             document_type: Type of document (statement, securities, etc.)
             max_pages: Maximum number of pages to process
+            callback: Progress callback function
             
         Returns:
             Tuple of (extracted data, result type)
         """
+        if callback:
+            callback(0, 1, "Starting document processing")
+        
         # Create temp file if needed
         temp_path = None
         file_path = self._prepare_file_path(file_path_or_bytes)
@@ -43,7 +48,7 @@ class PDFProcessingIntegration:
                     file_path,
                     max_pages=max_pages
                 )
-                return securities_data, 'securities'
+                result_type = 'securities'
             else:
                 # Extract text and tables
                 content, content_type = extract_text_from_pdf(
@@ -54,8 +59,24 @@ class PDFProcessingIntegration:
                 if not content:
                     return [], 'error'
                 
-                return content, content_type
+                if any(keyword in str(content).lower() for keyword in ['transaction', 'payment', 'deposit', 'withdrawal']):
+                    result_type = 'transactions'
+                else:
+                    result_type = content_type
+                
+                securities_data = content
+            
+            if callback:
+                callback(1, 1, f"Completed processing {document_type} document")
+                
+            return securities_data, result_type
                     
+        except Exception as e:
+            logger.error(f"Error processing document: {str(e)}", exc_info=True)
+            if callback:
+                callback(1, 1, f"Error processing document: {str(e)}")
+            return [], 'error'
+        
         finally:
             # Cleanup temp file if created
             if temp_path and os.path.exists(temp_path):
@@ -144,6 +165,142 @@ class PDFProcessingIntegration:
                 continue
         
         return results
+
+    def process_document_in_chunks(
+        self,
+        file_path_or_bytes: Union[str, bytes, BinaryIO],
+        chunk_size: int = 5,
+        document_type: Optional[str] = None,
+        callback: Optional[Callable[[int, int, str], None]] = None
+    ) -> Tuple[List[Dict[str, Any]], str]:
+        """
+        Process a large document in chunks to manage memory usage.
+        
+        Args:
+            file_path_or_bytes: File path or bytes content
+            chunk_size: Number of pages to process in each chunk
+            document_type: Type of document (statement, securities, etc.)
+            callback: Progress callback function
+            
+        Returns:
+            Tuple of (extracted data, result type)
+        """
+        if callback:
+            callback(0, 1, "Starting chunked processing")
+        
+        file_path = self._prepare_file_path(file_path_or_bytes)
+        total_pages = self._get_total_pages(file_path)
+        
+        if callback:
+            callback(0, total_pages, "Starting document processing")
+            
+        all_results = []
+        current_page = 0
+        
+        try:
+            while current_page < total_pages:
+                end_page = min(current_page + chunk_size, total_pages)
+                
+                if callback:
+                    callback(current_page, total_pages, f"Processing pages {current_page+1} to {end_page}")
+                
+                # Process chunk
+                if document_type == 'securities':
+                    chunk_results = self.securities_processor.process_pdf(
+                        file_path,
+                        max_pages=chunk_size,
+                        start_page=current_page
+                    )
+                    result_type = 'securities'
+                else:
+                    # Extract text and tables from chunk
+                    content, content_type = extract_text_from_pdf(
+                        file_path,
+                        max_pages=chunk_size,
+                        start_page=current_page
+                    )
+                    
+                    if content:
+                        if content_type == 'table':
+                            chunk_results = self._process_tables(content)
+                        else:
+                            chunk_results = self._process_text(content)
+                        result_type = 'transactions'
+                    else:
+                        chunk_results = []
+                        result_type = 'error'
+                
+                all_results.extend(chunk_results)
+                current_page += chunk_size
+                
+            if callback:
+                callback(total_pages, total_pages, "Processing complete")
+                
+            return all_results, result_type
+            
+        except Exception as e:
+            logger.error(f"Error in chunked processing: {str(e)}", exc_info=True)
+            if callback:
+                callback(1, 1, f"Error in chunked processing: {str(e)}")
+            return [], 'error'
+        
+        finally:
+            # Cleanup temp file if created
+            if isinstance(file_path_or_bytes, (bytes, BinaryIO)) and os.path.exists(file_path):
+                try:
+                    os.unlink(file_path)
+                except:
+                    pass
+
+    def auto_detect_document_type(self, file_path_or_bytes: Union[str, bytes, BinaryIO], filename: str = None) -> str:
+        """
+        Auto-detect the type of document based on content and filename.
+        
+        Args:
+            file_path_or_bytes: File path or content
+            filename: Original filename (optional)
+            
+        Returns:
+            Detected document type ('securities' or 'statement')
+        """
+        # Check filename first if provided
+        if filename:
+            filename_lower = filename.lower()
+            if any(term in filename_lower for term in ['securities', 'portfolio', 'holdings', 'positions']):
+                return 'securities'
+            elif any(term in filename_lower for term in ['statement', 'transaction', 'account']):
+                return 'statement'
+        
+        # Check content
+        file_path = self._prepare_file_path(file_path_or_bytes)
+        try:
+            import pdfplumber
+            with pdfplumber.open(file_path) as pdf:
+                if len(pdf.pages) > 0:
+                    text = pdf.pages[0].extract_text().lower()
+                    
+                    # Check for securities-related terms
+                    securities_terms = ['portfolio', 'securities', 'holdings', 'positions', 
+                                     'stocks', 'bonds', 'investments', 'shares']
+                    if any(term in text for term in securities_terms):
+                        return 'securities'
+                    
+                    # Check for statement-related terms
+                    statement_terms = ['account statement', 'transaction', 'balance', 
+                                     'withdrawal', 'deposit', 'credit', 'debit']
+                    if any(term in text for term in statement_terms):
+                        return 'statement'
+            
+            # Default to statement if uncertain
+            return 'statement'
+            
+        finally:
+            # Cleanup temp file if created
+            if isinstance(file_path_or_bytes, (bytes, BinaryIO)) and os.path.exists(file_path):
+                try:
+                    os.unlink(file_path)
+                except:
+                    pass
 
 
 # Initialize the integration for easy import

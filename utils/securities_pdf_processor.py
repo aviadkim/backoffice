@@ -29,36 +29,31 @@ class SecuritiesPDFProcessor:
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         self.model = genai.GenerativeModel('gemini-pro')
     
-    def process_pdf(
-        self,
-        file_path: str,
-        max_pages: int = None
-    ) -> list:
-        """
-        Process a PDF file to extract securities information.
-        
-        Args:
-            file_path: Path to PDF file
-            max_pages: Maximum number of pages to process
-            
-        Returns:
-            List of securities information dictionaries
-        """
+    def process_pdf(self, pdf_file_path: str, max_pages: Optional[int] = None, start_page: int = 0) -> List[Dict[str, Any]]:
+        """Process PDF file and extract securities information."""
         try:
-            with pdfplumber.open(file_path) as pdf:
-                # Get total pages
+            # Read PDF file
+            with pdfplumber.open(pdf_file_path) as pdf:
                 total_pages = len(pdf.pages)
-                if max_pages:
-                    total_pages = min(total_pages, max_pages)
+                if max_pages is not None:
+                    total_pages = min(total_pages, start_page + max_pages)
                 
-                # Process each page
                 all_securities = []
-                for page_num, page in enumerate(pdf.pages[:total_pages], 1):
-                    # Extract text from page
+                for page_num in range(start_page, total_pages):
+                    page = pdf.pages[page_num]
+                    
+                    # Extract tables and text
+                    tables = page.extract_tables()
                     text = page.extract_text()
-                    if text:
-                        # Extract securities information
-                        securities = self._extract_securities_from_text(text)
+                    
+                    # Process tables
+                    for table in tables:
+                        securities = self._process_table(table)
+                        all_securities.extend(securities)
+                    
+                    # Process text if no tables found
+                    if not tables and text:
+                        securities = self._process_text(text)
                         all_securities.extend(securities)
                 
                 return all_securities
@@ -505,4 +500,79 @@ class SecuritiesPDFProcessor:
         # Implementation for IB statement format  
         securities = []
         # ... custom processing ...
+        return securities
+    
+    def _process_table(self, table: List[List[str]]) -> List[Dict[str, Any]]:
+        """Process a table and extract securities information."""
+        securities = []
+        
+        # Convert table to DataFrame for easier processing
+        df = pd.DataFrame(table[1:], columns=table[0] if table else [])
+        
+        for _, row in df.iterrows():
+            security = {}
+            
+            # Try to identify columns
+            for col in row.index:
+                col_lower = str(col).lower()
+                if any(term in col_lower for term in ['name', 'security', 'description']):
+                    security['security_name'] = str(row[col]).strip()
+                elif 'isin' in col_lower:
+                    security['isin'] = str(row[col]).strip()
+                elif any(term in col_lower for term in ['quantity', 'units', 'shares']):
+                    try:
+                        security['quantity'] = float(str(row[col]).replace(',', ''))
+                    except:
+                        continue
+                elif any(term in col_lower for term in ['price', 'value per share']):
+                    try:
+                        security['price'] = float(str(row[col]).replace(',', ''))
+                    except:
+                        continue
+                elif any(term in col_lower for term in ['market value', 'total value']):
+                    try:
+                        security['market_value'] = float(str(row[col]).replace(',', ''))
+                    except:
+                        continue
+            
+            # Only add if we have the required fields
+            if all(field in security for field in ['security_name', 'quantity', 'market_value']):
+                # Calculate price if not provided
+                if 'price' not in security and security['quantity'] > 0:
+                    security['price'] = security['market_value'] / security['quantity']
+                securities.append(security)
+        
+        return securities
+        
+    def _process_text(self, text: str) -> List[Dict[str, Any]]:
+        """Process text content to extract securities information."""
+        securities = []
+        
+        # Split into lines
+        lines = text.split('\n')
+        
+        # Process each line
+        for line in lines:
+            # Skip empty lines
+            if not line.strip():
+                continue
+                
+            # Try to extract security information using regex
+            import re
+            
+            # Look for patterns like:
+            # Security Name (ISIN) Quantity Price Market Value
+            pattern = r'([^()]+)\s*(?:\(([\w\d]+)\))?\s*(\d+(?:,\d+)?(?:\.\d+)?)\s*(\d+(?:,\d+)?(?:\.\d+)?)\s*(\d+(?:,\d+)?(?:\.\d+)?)'
+            
+            match = re.search(pattern, line)
+            if match:
+                security = {
+                    'security_name': match.group(1).strip(),
+                    'isin': match.group(2) if match.group(2) else '',
+                    'quantity': float(match.group(3).replace(',', '')),
+                    'price': float(match.group(4).replace(',', '')),
+                    'market_value': float(match.group(5).replace(',', ''))
+                }
+                securities.append(security)
+        
         return securities

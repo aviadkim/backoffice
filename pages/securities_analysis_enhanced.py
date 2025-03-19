@@ -70,10 +70,11 @@ def create_portfolio_chart(securities_analysis):
         names = names[:10] + ['Other']
         values = values[:10] + [other_value]
     
-    # Create pie chart
-    fig, ax = plt.subplots(figsize=(10, 8))
+    # Create pie chart using plt.figure() to avoid streamlit state issues
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111)
     ax.pie(values, labels=names, autopct='%1.1f%%', startangle=90)
-    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+    ax.axis('equal')
     plt.title('Portfolio Composition by Market Value')
     
     return fig
@@ -107,8 +108,9 @@ def create_banks_chart(securities_analysis):
     banks = [banks[i] for i in sorted_indices]
     values = [values[i] for i in sorted_indices]
     
-    # Create bar chart
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # Create bar chart using plt.figure()
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111)
     ax.bar(banks, values)
     ax.set_xlabel('Institution')
     ax.set_ylabel('Market Value ($)')
@@ -130,8 +132,9 @@ def create_performance_chart(performance_analysis):
     period_labels = [p.get('period', '') for p in periods]
     values = [p.get('total_market_value', 0) for p in periods]
     
-    # Create line chart
-    fig, ax = plt.subplots(figsize=(10, 6))
+    # Create line chart using plt.figure()
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111)
     ax.plot(period_labels, values, marker='o', linestyle='-', linewidth=2)
     ax.set_xlabel('Period')
     ax.set_ylabel('Portfolio Value ($)')
@@ -177,11 +180,15 @@ def main():
         if st.button("Analyze Current Securities", disabled=not has_securities):
             with st.spinner("Analyzing securities..."):
                 try:
+                    # Clear previous analysis results
+                    st.session_state.securities_analysis = None
+                    
                     # Perform analysis
                     analysis = securities_analyzer.analyze_securities_by_isin(st.session_state.securities)
-                    st.session_state.securities_analysis = analysis
                     
-                    if analysis['status'] == 'success':
+                    # Store results in session state
+                    if analysis and analysis.get('status') == 'success':
+                        st.session_state.securities_analysis = analysis
                         st.success("Securities analysis completed successfully!")
                     else:
                         st.error(f"Analysis failed: {analysis.get('message', 'Unknown error')}")
@@ -194,14 +201,13 @@ def main():
         if st.button("Generate Performance Analysis", disabled=not has_securities):
             with st.spinner("Analyzing performance..."):
                 try:
-                    # Create historical data (mock for this example)
-                    # In a real app, you would load historical data from a database
+                    # Clear previous performance results
+                    st.session_state.performance_analysis = None
                     
-                    # Use current securities as the most recent period
+                    # Add current date to securities for historical analysis
                     current_date = datetime.now().strftime('%Y-%m-%d')
                     historical_data = []
                     
-                    # Add current securities to historical data
                     for security in st.session_state.securities:
                         security_copy = security.copy()
                         security_copy['date'] = current_date
@@ -209,9 +215,10 @@ def main():
                     
                     # Perform performance analysis
                     performance = securities_analyzer.analyze_performance_over_time(historical_data, 'monthly')
-                    st.session_state.performance_analysis = performance
                     
-                    if performance['status'] == 'success':
+                    # Store results in session state
+                    if performance and performance.get('status') == 'success':
+                        st.session_state.performance_analysis = performance
                         st.success("Performance analysis completed successfully!")
                     else:
                         st.error(f"Performance analysis failed: {performance.get('message', 'Unknown error')}")
@@ -224,69 +231,82 @@ def main():
     if st.session_state.securities_analysis and st.session_state.securities_analysis['status'] == 'success':
         st.subheader("Securities Analysis Results")
         
-        # Summary information
-        summary = st.session_state.securities_analysis['summary']
-        st.write(f"**Total Portfolio Value:** ${summary['total_portfolio_value']:,.2f}")
-        st.write(f"**Total Securities:** {summary['total_securities']}")
-        
-        # Portfolio composition chart
-        st.subheader("Portfolio Composition")
-        fig = create_portfolio_chart(st.session_state.securities_analysis)
-        if fig:
-            st.pyplot(fig)
-        
-        # Holdings by bank chart
-        st.subheader("Holdings by Institution")
-        bank_fig = create_banks_chart(st.session_state.securities_analysis)
-        if bank_fig:
-            st.pyplot(bank_fig)
-        
-        # Price discrepancies if any
-        discrepancies = summary.get('price_discrepancies', [])
-        if discrepancies:
-            st.subheader("Price Discrepancies")
-            st.warning(f"Found {len(discrepancies)} securities with price discrepancies across sources.")
+        try:
+            # Summary information
+            summary = st.session_state.securities_analysis['summary']
+            st.write(f"**Total Portfolio Value:** ${summary['total_portfolio_value']:,.2f}")
+            st.write(f"**Total Securities:** {summary['total_securities']}")
             
-            discrepancies_df = pd.DataFrame(discrepancies)
-            st.dataframe(discrepancies_df)
+            # Portfolio composition chart
+            st.subheader("Portfolio Composition")
+            fig = create_portfolio_chart(st.session_state.securities_analysis)
+            if fig:
+                st.pyplot(fig)
+                plt.close(fig)  # Clean up
+            
+            # Holdings by bank chart
+            st.subheader("Holdings by Institution")
+            bank_fig = create_banks_chart(st.session_state.securities_analysis)
+            if bank_fig:
+                st.pyplot(bank_fig)
+                plt.close(bank_fig)  # Clean up
+            
+            # Price discrepancies if any
+            discrepancies = summary.get('price_discrepancies', [])
+            if discrepancies:
+                st.subheader("Price Discrepancies")
+                st.warning(f"Found {len(discrepancies)} securities with price discrepancies across sources.")
+                
+                discrepancies_df = pd.DataFrame(discrepancies)
+                st.dataframe(discrepancies_df)
+        
+        except Exception as e:
+            st.error(f"Error displaying analysis results: {str(e)}")
+            logger.error(f"Error displaying analysis results: {str(e)}", exc_info=True)
     
     # Display performance analysis if available
     if st.session_state.performance_analysis and st.session_state.performance_analysis['status'] == 'success':
         st.subheader("Performance Analysis")
         
-        # Overall performance
-        overall = st.session_state.performance_analysis['overall_performance']
-        if overall:
-            st.write(f"**Starting Value:** ${overall['first_period']:,.2f}")
-            st.write(f"**Current Value:** ${overall['last_period']:,.2f}")
+        try:
+            # Overall performance
+            overall = st.session_state.performance_analysis['overall_performance']
+            if overall:
+                st.write(f"**Starting Value:** ${overall['first_period']:,.2f}")
+                st.write(f"**Current Value:** ${overall['last_period']:,.2f}")
+                
+                change = overall['change']
+                percent_change = overall['percent_change']
+                
+                if change > 0:
+                    st.write(f"**Change:** 📈 +${change:,.2f} (+{percent_change:.2f}%)")
+                else:
+                    st.write(f"**Change:** 📉 ${change:,.2f} ({percent_change:.2f}%)")
             
-            change = overall['change']
-            percent_change = overall['percent_change']
+            # Performance chart
+            st.subheader("Portfolio Value Over Time")
+            perf_fig = create_performance_chart(st.session_state.performance_analysis)
+            if perf_fig:
+                st.pyplot(perf_fig)
+                plt.close(perf_fig)  # Clean up
             
-            if change > 0:
-                st.write(f"**Change:** 📈 +${change:,.2f} (+{percent_change:.2f}%)")
-            else:
-                st.write(f"**Change:** 📉 ${change:,.2f} ({percent_change:.2f}%)")
+            # Best performing securities
+            best_performers = st.session_state.performance_analysis.get('best_performing_securities', [])
+            if best_performers:
+                st.subheader("Best Performing Securities")
+                best_df = pd.DataFrame(best_performers)[['security_name', 'first_price', 'last_price', 'percent_change']]
+                st.dataframe(best_df)
+            
+            # Worst performing securities
+            worst_performers = st.session_state.performance_analysis.get('worst_performing_securities', [])
+            if worst_performers:
+                st.subheader("Worst Performing Securities")
+                worst_df = pd.DataFrame(worst_performers)[['security_name', 'first_price', 'last_price', 'percent_change']]
+                st.dataframe(worst_df)
         
-        # Performance chart
-        st.subheader("Portfolio Value Over Time")
-        perf_fig = create_performance_chart(st.session_state.performance_analysis)
-        if perf_fig:
-            st.pyplot(perf_fig)
-        
-        # Best performing securities
-        best_performers = st.session_state.performance_analysis.get('best_performing_securities', [])
-        if best_performers:
-            st.subheader("Best Performing Securities")
-            best_df = pd.DataFrame(best_performers)[['security_name', 'first_price', 'last_price', 'percent_change']]
-            st.dataframe(best_df)
-        
-        # Worst performing securities
-        worst_performers = st.session_state.performance_analysis.get('worst_performing_securities', [])
-        if worst_performers:
-            st.subheader("Worst Performing Securities")
-            worst_df = pd.DataFrame(worst_performers)[['security_name', 'first_price', 'last_price', 'percent_change']]
-            st.dataframe(worst_df)
+        except Exception as e:
+            st.error(f"Error displaying performance results: {str(e)}")
+            logger.error(f"Error displaying performance results: {str(e)}", exc_info=True)
     
     # Generate consolidated report if both analyses are available
     if (st.session_state.securities_analysis and st.session_state.securities_analysis['status'] == 'success' and
@@ -373,12 +393,16 @@ def main():
             # Add to existing securities
             if st.button("Add to Current Securities"):
                 st.session_state.securities.extend(new_securities)
+                # Clear analysis results when data changes
+                st.session_state.securities_analysis = None
+                st.session_state.performance_analysis = None
                 st.success(f"Added {len(new_securities)} securities to your data.")
                 st.experimental_rerun()
             
             # Replace existing securities
             if st.button("Replace Current Securities"):
                 st.session_state.securities = new_securities
+                # Clear analysis results when data changes
                 st.session_state.securities_analysis = None
                 st.session_state.performance_analysis = None
                 st.success(f"Replaced securities data with {len(new_securities)} new records.")
@@ -387,34 +411,6 @@ def main():
         except Exception as e:
             st.error(f"Error processing uploaded file: {str(e)}")
             logger.error(f"Error processing uploaded file: {str(e)}", exc_info=True)
-    
-    # Display instructions
-    with st.expander("Instructions"):
-        st.markdown("""
-        ### How to use the Securities Analysis page
-        
-        1. **Upload securities data** from a PDF using the Document Upload page
-        2. **Analyze the securities** to get insights into your portfolio
-        3. **Generate a performance analysis** to see how your portfolio has changed over time
-        4. **Create a consolidated report** with all the insights
-        
-        ### Data Format
-        
-        You can upload additional securities data in CSV or JSON format. The CSV should have the following columns:
-        
-        - `isin` - International Securities Identification Number
-        - `security_name` - Name of the security
-        - `quantity` - Number of shares or units
-        - `price` - Price per share or unit
-        - `market_value` - Total market value
-        - `bank` - Financial institution holding the security
-        
-        ### Tips
-        
-        - For price discrepancy detection, upload securities data from multiple sources
-        - For performance analysis, include historical data with dates
-        - Use the AI insights for personalized recommendations based on your portfolio
-        """)
 
 if __name__ == "__main__":
     main()

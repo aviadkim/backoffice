@@ -7,6 +7,7 @@ import tempfile
 from utils.ocr_processor import extract_text_from_pdf
 import logging
 import hashlib
+from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -20,111 +21,122 @@ class SecuritiesPDFProcessor:
             "fidelity", "vanguard", "merrill"
         ]
     
-    def process_pdf(self, pdf_file_path, bank_name=None):
-        """Process a PDF file to extract securities information."""
-        # Determine bank name from filename if not provided
-        if not bank_name:
-            file_basename = os.path.basename(pdf_file_path).lower()
-            for bank in self.supported_banks:
-                if bank in file_basename:
-                    bank_name = bank
-                    break
-        
-        logger.info(f"Processing securities PDF for bank: {bank_name}")
-        
-        # Extract text using OCR processor
-        extracted_results, result_type = extract_text_from_pdf(pdf_file_path)
-        
-        if result_type == "table":
-            return self._process_pdf_tables(extracted_results, bank_name)
-        elif result_type == "text":
-            return self._process_pdf_text(extracted_results, bank_name, pdf_file_path)
-        else:
-            return self._process_with_pdfplumber(pdf_file_path, bank_name)
-
-    def _process_pdf_tables(self, tables, bank_name=None):
-        """Process extracted tables from a PDF."""
-        securities = []
-        
-        for table in tables:
-            if isinstance(table, pd.DataFrame):
-                securities.extend(self._extract_securities_from_df(table, bank_name))
-                
-        return securities
-
-    def _process_pdf_text(self, text_results, bank_name=None, pdf_path=None):
-        """Process extracted text from a PDF."""
-        securities = []
-        text = "\n".join(text_results) if isinstance(text_results, list) else text_results
-        
-        # Look for ISIN patterns
-        isin_pattern = r'([A-Z]{2}[A-Z0-9]{10})'
-        for match in re.finditer(isin_pattern, text):
-            isin = match.group(1)
-            context = text[max(0, match.start()-50):min(len(text), match.end()+50)]
-            
-            security_data = {
-                'isin': isin,
-                'bank': bank_name or 'Unknown'
-            }
-            
-            # Try to extract security name
-            name_match = re.search(r'([A-Za-z0-9\s.,&\'-]{3,30})\s*?' + re.escape(isin), context)
-            if name_match:
-                security_data['security_name'] = name_match.group(1).strip()
-            
-            # Look for numbers (quantity, price, value)
-            numbers = re.findall(r'[\d,.]+', context)
-            numbers = [float(n.replace(',', '')) for n in numbers if n.replace(',', '').replace('.', '').isdigit()]
-            
-            if numbers:
-                if len(numbers) >= 1:
-                    security_data['quantity'] = numbers[0]
-                if len(numbers) >= 2:
-                    security_data['price'] = numbers[1]
-                if len(numbers) >= 3:
-                    security_data['market_value'] = numbers[2]
-            
-            securities.append(security_data)
-            
-        return securities
-
-    def _process_with_pdfplumber(self, pdf_path, bank_name=None):
-        """Process PDF using pdfplumber directly."""
-        securities = []
-        
+    def process_pdf(self, pdf_path: str, max_pages: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Process PDF file and extract securities information."""
         try:
             with pdfplumber.open(pdf_path) as pdf:
-                text = ""
-                for page in pdf.pages:
-                    text += page.extract_text() or ""
+                total_pages = len(pdf.pages)
+                if max_pages is not None:
+                    total_pages = min(total_pages, int(max_pages))
                 
-                if text:
-                    return self._process_pdf_text(text, bank_name)
+                securities = []
+                for page_num in range(total_pages):
+                    page = pdf.pages[page_num]
+                    tables = page.extract_tables()
                     
+                    for table in tables:
+                        extracted = self._process_table(table)
+                        if extracted:
+                            securities.extend(extracted)
+                    
+                    # If no tables found, try text extraction
+                    if not tables:
+                        text = page.extract_text()
+                        extracted = self._process_text(text)
+                        if extracted:
+                            securities.extend(extracted)
+                
+                return securities
         except Exception as e:
-            logger.error(f"Error processing PDF with pdfplumber: {e}")
+            logger.error(f"Error processing securities PDF: {str(e)}", exc_info=True)
+            return []
+
+    def _process_table(self, table: List[List[str]]) -> List[Dict[str, Any]]:
+        securities = []
+        if not table or not table[0]:
+            return securities
             
+        headers = [str(h).lower() for h in table[0]]
+        
+        for row in table[1:]:
+            if not row or all(cell == '' for cell in row):
+                continue
+                
+            security = {}
+            for idx, cell in enumerate(row):
+                if idx >= len(headers):
+                    continue
+                    
+                header = headers[idx]
+                if any(term in header for term in ['name', 'security', 'description']):
+                    security['security_name'] = str(cell).strip()
+                elif 'isin' in header:
+                    security['isin'] = str(cell).strip()
+                elif any(term in header for term in ['quantity', 'units', 'shares']):
+                    try:
+                        security['quantity'] = float(str(cell).replace(',', ''))
+                    except (ValueError, TypeError):
+                        continue
+                elif any(term in header for term in ['price', 'value per share']):
+                    try:
+                        security['price'] = float(str(cell).replace(',', ''))
+                    except (ValueError, TypeError):
+                        continue
+                elif any(term in header for term in ['market value', 'total value']):
+                    try:
+                        security['market_value'] = float(str(cell).replace(',', ''))
+                    except (ValueError, TypeError):
+                        continue
+            
+            if security.get('security_name') and security.get('quantity'):
+                securities.append(security)
+        
         return securities
 
-    def _extract_securities_from_df(self, df, bank_name=None):
-        """Extract securities information from a DataFrame."""
+    def _process_text(self, text: str) -> List[Dict[str, Any]]:
         securities = []
+        lines = text.split('\n')
         
-        for _, row in df.iterrows():
-            security_data = {
-                'isin': row.get('ISIN', self._generate_placeholder_isin(row.get('Security Name', 'Unknown'))),
-                'security_name': row.get('Security Name', 'Unknown'),
-                'quantity': row.get('Quantity', 0),
-                'price': row.get('Price', 0),
-                'market_value': row.get('Market Value', 0),
-                'bank': bank_name or 'Unknown'
-            }
-            securities.append(security_data)
+        for line in lines:
+            if not line.strip():
+                continue
+            
+            # Match common patterns for securities data
+            patterns = [
+                # Pattern 1: Name ISIN Quantity Price Value
+                r'([^0-9]+)\s*((?:[A-Z]{2})?[A-Z0-9]{10,12})?\s*(\d[,.\d]*)\s*(?:@\s*)?(\d[,.\d]*)\s*(\d[,.\d]*)',
+                # Pattern 2: Name Quantity @ Price
+                r'([^@]+)\s*(\d[,.\d]*)\s*@\s*(\d[,.\d]*)',
+                # Pattern 3: Name (ISIN) Quantity
+                r'([^(]+)\s*\(([A-Z0-9]{12})\)\s*(\d[,.\d]*)'
+            ]
+            
+            for pattern in patterns:
+                match = re.search(pattern, line)
+                if match:
+                    groups = match.groups()
+                    security = {'security_name': groups[0].strip()}
+                    
+                    # Add ISIN if present
+                    if len(groups) > 1 and groups[1] and len(groups[1]) >= 10:
+                        security['isin'] = groups[1].strip()
+                    
+                    # Add quantity
+                    try:
+                        quantity_str = next(g for g in groups[1:] if g and any(c.isdigit() for c in g))
+                        security['quantity'] = float(quantity_str.replace(',', ''))
+                    except (StopIteration, ValueError):
+                        continue
+                    
+                    # Add price if present
+                    if len(groups) > 3:
+                        try:
+                            security['price'] = float(groups[-2].replace(',', ''))
+                            security['market_value'] = float(groups[-1].replace(',', ''))
+                        except (ValueError, IndexError):
+                            pass
+                    
+                    securities.append(security)
+                    break
         
         return securities
-    
-    def _generate_placeholder_isin(self, security_name):
-        """Generate a placeholder ISIN for securities without one."""
-        name_hash = hashlib.md5(security_name.encode()).hexdigest()
-        return f"XX{name_hash[:10].upper()}"

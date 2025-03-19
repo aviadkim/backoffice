@@ -2,6 +2,9 @@ import google.generativeai as genai
 import os
 import json
 from dotenv import load_dotenv
+import unittest
+from unittest.mock import patch, MagicMock
+from utils.pdf_integration import PDFProcessingIntegration
 
 # Load API key
 load_dotenv()
@@ -83,3 +86,33 @@ except Exception as e:
     # Try to get more details about the error
     if hasattr(e, "dict"):
         print(f"Error attributes: {e.dict}")
+
+class TestGeminiFunctionCalling(unittest.TestCase):
+    def setUp(self):
+        self.pdf_processor = PDFProcessingIntegration()
+        
+    @patch('google.generativeai.GenerativeModel')
+    def test_process_text_with_gemini(self, mock_model):
+        # Mock the Gemini model response
+        mock_response = MagicMock()
+        mock_response.text = json.dumps([{
+            "date": "2024-03-16",
+            "description": "Test Transaction",
+            "amount": 100.00,
+            "category": "Test"
+        }])
+        mock_model.return_value.generate_content.return_value = mock_response
+        
+        # Test processing text
+        result = self.pdf_processor._process_text(["Test financial document content"])
+        self.assertTrue(isinstance(result, list))
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["description"], "Test Transaction")
+        
+    def test_auto_detect_document_type(self):
+        # Test with securities content
+        with patch('pdfplumber.open') as mock_pdf:
+            mock_page = MagicMock()
+            mock_page.extract_text.return_value = "Portfolio Holdings Report"
+            mock_pdf.return_value.__enter__.return_value.pages = [mock_page]
+            

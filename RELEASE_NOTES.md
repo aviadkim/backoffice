@@ -1,50 +1,48 @@
-# FinAnalyzer - Release Notes
+# הערות שחרור - גרסה 3.6.0
 
-## Version 1.1 - Gemini AI Integration
+תאריך: מרץ 2025
 
-### New Features
-- **AI-Powered Document Processing**: Added Gemini 2.0 Pro AI integration for intelligent extraction of financial transactions from documents
-- **Financial Agents System**: Implemented specialized AI agents for different financial tasks:
-  - Document Processing Agent - Extracts transactions from text
-  - Financial Analysis Agent - Analyzes spending patterns and trends
-  - Financial Advisor Agent - Provides personalized financial advice
-  - Report Generation Agent - Creates comprehensive financial reports
-- **New Reports Page**: Added a dedicated reports section with multiple report types:
-  - Monthly Summary Reports
-  - Category Analysis
-  - Trend Analysis
-  - Comprehensive Financial Reports
-- **API Key Management**: Added secure storage and management of Gemini API keys
+## סקירה כללית
+גרסה 3.6.0 מביאה שיפורים משמעותיים בטיפול בקבצים פיננסיים, זיהוי מבני נתונים (טבלאות אחזקות, נתוני ניירות ערך) וחילוץ מידע מסמכים. גרסה זו מתמקדת בשיפור אמינות המערכת ומתן פתרון לבעיות שהתגלו בשימוש במערכת עם קבצי PDF שונים.
 
-### Technical Improvements
-- Created a GeminiAdapter to make Gemini models compatible with agent frameworks
-- Implemented the FinancialAgentRunner utility for simplified agent usage
-- Added proper session state management for persistent data between interactions
-- Enhanced the sidebar with API configuration options
+## שיפורים עיקריים
 
-### Bug Fixes
-- Fixed issues with dependency management
-- Improved error handling in document processing
+### 1. טיפול משופר בקבצים
+- **טיפול בקבצים זמניים**: מניעת אובדן קבצים במהלך תהליך העלאה ועיבוד
+- **אימות קבצים**: בדיקות אוטומטיות לוודא שהקובץ נשמר כראוי לפני המשך העיבוד
+- **שמירת קבצים בעייתיים**: במקרה של שגיאה בעיבוד, הקובץ נשמר לצורך ניתוח וטיפול
 
-Summary of What You've Added
+### 2. שיפורים בחילוץ מידע פיננסי
+- **זיהוי מבני**: חילוץ אוטומטי של מבנים פיננסיים כגון טבלאות אחזקות
+- **זיהוי שדות**: זיהוי חכם של שדות בטבלאות (ISIN, שם נייר, מחיר, כמות, שווי, מטבע)
+- **טיפול בפורמטים מספריים**: המרה אוטומטית של מספרים בפורמטים שונים וזיהוי מטבעות
 
-Multi-Agent System: You've added a sophisticated multi-agent system that includes:
+### 3. תצוגה משופרת
+- **ממשק משתמש**: תצוגה משופרת של תוצאות החילוץ עם חלוקה לקטגוריות
+- **תמיכה בעברית**: הודעות שגיאה וממשק בעברית
+- **תצוגת טבלאות**: תצוגה מובנית של טבלאות שחולצו מהמסמך
 
-Document processing agent
-Financial analysis agent
-Financial advisor agent
-Report generation agent
+## תיקוני באגים
+- תיקון בעיית אובדן קבצים במהלך העלאה וסריקה
+- תיקון שגיאה בקריאה ל-OCR API עם פרמטרים לא נתמכים
+- תיקון שגיאת 'filename' בתהליך שמירת המידע המחולץ
+- שיפור הטיפול בשגיאות וההתאוששות מהן
 
+## הוראות התקנה
+1. עדכן את הקוד מ-GitHub:
+   ```
+   git pull origin main
+   ```
+2. התקן תלויות חדשות (אם יש):
+   ```
+   pip install -r requirements.txt
+   ```
+3. הפעל את האפליקציה:
+   ```
+   python app.py
+   ```
 
-Advanced Reports: Your app can now generate comprehensive financial reports:
-
-Monthly summaries
-Category analysis
-Trend analysis
-Comprehensive financial advice
-
-
-Integration with OpenAI's Agents SDK: This provides a structured framework for agent orchestration while still using Gemini as the underlying model
-Improved AI Interaction: The AI assistant can now provide more targeted and context-aware responses
-
-This implementation significantly enhances your application, turning it from a simple document processor into a comprehensive financial analysis and advisory system. As users upload more documents, the system will build a richer financial profile and provide increasingly valuable insights and recommendations.
+## הערות נוספות
+- גרסה זו מותאמת לפעול על מגוון רחב יותר של קבצי PDF
+- הוספנו תיעוד מפורט יותר של שגיאות לצורך קלות באיתור בעיות
+- יש להגדיר את MISTRAL_API_KEY בקובץ .env כנדרש

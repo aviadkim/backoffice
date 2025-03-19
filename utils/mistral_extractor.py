@@ -8,8 +8,15 @@ from dotenv import load_dotenv
 from datetime import datetime
 import time
 
-# הגדרת לוגים
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/mistral_extractor.log'),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
 
 # טעינת משתני סביבה
@@ -23,22 +30,13 @@ class MistralExtractor:
     """
     
     def __init__(self):
-        """Initialize the Mistral OCR extractor."""
+        """Initialize the MistralExtractor with API key."""
         self.api_key = MISTRAL_API_KEY
         if not self.api_key:
             raise ValueError("MISTRAL_API_KEY environment variable is not set")
-        
         logger.debug(f"MISTRAL_API_KEY exists: {bool(self.api_key)}")
-        logger.debug("Initializing Mistral client...")
-        
-        try:
-            self.client = Mistral(api_key=self.api_key)
-            self.model = "mistral-ocr-latest"  # מודל ה-OCR של Mistral
-            logger.info("Mistral OCR extractor initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize Mistral client: {str(e)}")
-            raise
-    
+        self.client = Mistral(api_key=self.api_key)
+
     def process_pdf_file(self, pdf_path):
         """Process a local PDF file and extract text using Mistral OCR."""
         if not os.path.exists(pdf_path):
@@ -283,158 +281,374 @@ class MistralExtractor:
             logger.warning(f"Could not normalize date: {date_str}, error: {str(e)}")
             return date_str
 
-    def extract_all_content(self, pdf_path):
-        """Extract all content from PDF including text, tables and images."""
+    def _extract_images(self, ocr_response):
+        """Extract images and their associated text from the OCR response."""
+        images = []
         try:
-            logger.info(f"Starting to process PDF file: {pdf_path}")
-            start_time = time.time()
-            
-            if not os.path.exists(pdf_path):
-                logger.error(f"PDF file not found: {pdf_path}")
-                return None
-            
-            # Initialize OCR
-            try:
-                logger.info("Initializing OCR client...")
-                ocr = self.client.ocr
-                logger.info("OCR initialized successfully")
-            except Exception as e:
-                logger.error(f"Failed to initialize OCR: {str(e)}", exc_info=True)
-                return None
-            
-            # Process PDF
-            logger.info("Starting PDF processing")
-            try:
-                logger.info("Reading PDF file...")
-                with open(pdf_path, 'rb') as file:
-                    pdf_content = file.read()
-                logger.info(f"Read {len(pdf_content)} bytes from PDF file")
-                
-                logger.info("Converting PDF to base64...")
-                pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
-                data_url = f"data:application/pdf;base64,{pdf_base64}"
-                
-                logger.info("Sending request to Mistral API...")
-                result = self.client.chat.completions.create(
-                    model="mistral-large-latest",
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": "Extract all text and tables from this PDF document. Include any financial data, account numbers, dates, and transaction details. Format tables in markdown format."
-                                },
-                                {
-                                    "type": "image_url",
-                                    "image_url": {
-                                        "url": data_url
+            if hasattr(ocr_response, 'pages'):
+                for page in ocr_response.pages:
+                    if hasattr(page, 'images'):
+                        for img in page.images:
+                            image_data = {
+                                "page_number": getattr(page, 'page_number', 0),
+                                "image_data": img.image_data if hasattr(img, 'image_data') else None,
+                                "text": "",
+                                "tables": []
+                            }
+                            
+                            # Try to extract text from the image
+                            if hasattr(img, 'text'):
+                                image_data["text"] = img.text
+                            elif hasattr(img, 'markdown'):
+                                image_data["text"] = img.markdown
+                            elif hasattr(img, 'content'):
+                                image_data["text"] = img.content
+                            
+                            # Clean up the extracted text
+                            if image_data["text"]:
+                                # Remove image references
+                                image_data["text"] = re.sub(r'!\[img-\d+\.jpeg\]\(img-\d+\.jpeg\)', '', image_data["text"])
+                                # Clean up whitespace
+                                image_data["text"] = re.sub(r'\n\s*\n', '\n\n', image_data["text"])
+                                # Extract financial data from image text
+                                isin_matches = re.finditer(r'([A-Z]{2}[A-Z0-9]{9}\d)', image_data["text"])
+                                for match in isin_matches:
+                                    isin = match.group(1)
+                                    # Look for associated data near the ISIN
+                                    context = image_data["text"][max(0, match.start()-200):min(len(image_data["text"]), match.end()+200)]
+                                    
+                                    # Extract security details
+                                    security = {
+                                        "isin": isin,
+                                        "name": self._extract_security_name(context),
+                                        "price": self._extract_price(context),
+                                        "quantity": self._extract_quantity(context),
+                                        "value": self._extract_value(context),
+                                        "currency": self._extract_currency(context)
                                     }
-                                }
-                            ]
-                        }
-                    ],
-                    max_tokens=4096
-                )
-                
-                if not result:
-                    logger.error("OCR processing returned no results")
-                    return None
-                    
-                logger.info("Successfully received response from Mistral API")
-                
-            except Exception as e:
-                logger.error(f"Error during PDF processing: {str(e)}", exc_info=True)
-                return None
-            
-            # Initialize result structure
-            extracted_content = {
-                "metadata": {
-                    "filename": os.path.basename(pdf_path),
-                    "total_pages": 1,  # We'll update this based on the content
-                    "file_size": os.path.getsize(pdf_path),
-                    "processed_date": datetime.now().isoformat()
-                },
-                "tables": [],
-                "text": [],
-                "images": [],
-                "summary": {
-                    "total_income": 0,
-                    "total_expenses": 0,
-                    "balance": 0,
-                    "num_transactions": 0
-                },
-                "transactions": []
-            }
-            
-            # Process the response
-            try:
-                content = result.choices[0].message.content
-                logger.info(f"Extracted content length: {len(content)} characters")
-                
-                # Split into pages
-                pages = content.split("\n\n")
-                logger.info(f"Found {len(pages)} pages")
-                
-                # Process each page
-                for page_num, page_content in enumerate(pages, 1):
-                    try:
-                        page_start_time = time.time()
-                        logger.info(f"Processing page {page_num}/{len(pages)}")
-                        
-                        # Extract text from page
-                        if page_content:
-                            logger.info(f"Extracted {len(page_content)} characters from page {page_num}")
-                            extracted_content["text"].append({
-                                "page": page_num,
-                                "content": page_content
-                            })
-                        
-                        # Extract tables from page
-                        table_pattern = r"\|[^|]+\|[^|]+\|[\s\S]*?(?=\n\n|\Z)"
-                        tables = re.finditer(table_pattern, page_content)
-                        
-                        for table_match in tables:
-                            table_text = table_match.group(0)
-                            logger.info(f"Found table on page {page_num}")
+                                    
+                                    # Add to financial data
+                                    if not hasattr(image_data, "financial_data"):
+                                        image_data["financial_data"] = {"holdings": []}
+                                    image_data["financial_data"]["holdings"].append(security)
+                                
+                                logger.info(f"Extracted text from image on page {image_data['page_number']}: {image_data['text'][:100]}...")
                             
-                            # Parse table
-                            rows = [row.strip().split('|') for row in table_text.split('\n')]
-                            rows = [[cell.strip() for cell in row if cell.strip()] for row in rows if any(cell.strip() for cell in row)]
+                            # Try to extract tables from the image text
+                            if image_data["text"]:
+                                image_data["tables"] = self._extract_tables(image_data["text"])
+                                logger.info(f"Extracted {len(image_data['tables'])} tables from image on page {image_data['page_number']}")
                             
-                            if len(rows) >= 2:  # At least header and one data row
-                                table_data = {
-                                    "page": page_num,
-                                    "headers": rows[0],
-                                    "rows": rows[1:],
-                                    "source": "text"
-                                }
-                                extracted_content["tables"].append(table_data)
-                                logger.info(f"Added table with {len(rows)-1} rows")
-                        
-                        page_processing_time = time.time() - page_start_time
-                        logger.info(f"Page {page_num}/{len(pages)} processed in {page_processing_time:.2f} seconds")
-                        
-                    except Exception as e:
-                        logger.error(f"Error processing page {page_num}: {str(e)}", exc_info=True)
-                        continue
-                
-                # Update metadata
-                extracted_content["metadata"]["total_pages"] = len(pages)
-                
-                total_processing_time = time.time() - start_time
-                logger.info(f"Total processing completed in {total_processing_time:.2f} seconds")
-                logger.info(f"Extracted {len(extracted_content['tables'])} tables and {len(extracted_content['text'])} text sections")
-                
-                return extracted_content
-                
-            except Exception as e:
-                logger.error(f"Error processing response: {str(e)}", exc_info=True)
-                return None
+                            images.append(image_data)
+            
+            return images
             
         except Exception as e:
-            logger.error(f"Error extracting content: {str(e)}", exc_info=True)
+            logger.error(f"Error extracting images: {str(e)}", exc_info=True)
+            return []
+
+    def extract_all_content(self, file_path):
+        """Extract all content from a PDF file using Mistral OCR."""
+        try:
+            logger.info(f"Starting content extraction from {file_path}")
+            
+            # Upload the PDF file
+            with open(file_path, "rb") as pdf_file:
+                uploaded_file = self.client.files.upload(
+                    file={
+                        "file_name": os.path.basename(file_path),
+                        "content": pdf_file.read(),
+                    },
+                    purpose="ocr"
+                )
+            
+            logger.info(f"File uploaded successfully with ID: {uploaded_file.id}")
+            
+            # Get signed URL for the uploaded file
+            signed_url = self.client.files.get_signed_url(file_id=uploaded_file.id)
+            logger.info("Got signed URL for file")
+            
+            # Process the document with OCR
+            ocr_response = self.client.ocr.process(
+                model="mistral-ocr-latest",
+                document={
+                    "type": "document_url",
+                    "document_url": signed_url.url,
+                }
+            )
+            
+            logger.info("OCR processing completed")
+            
+            # Extract text and tables from the response
+            extracted_text = ""
+            financial_data = {
+                "holdings": [],
+                "transactions": [],
+                "summary": {
+                    "total_value": 0,
+                    "total_holdings": 0
+                }
+            }
+            
+            if hasattr(ocr_response, 'pages'):
+                for page in ocr_response.pages:
+                    # Extract text from different sources
+                    page_text = ""
+                    if hasattr(page, 'text'):
+                        page_text += page.text + "\n"
+                    if hasattr(page, 'markdown'):
+                        page_text += page.markdown + "\n"
+                    if hasattr(page, 'content'):
+                        page_text += page.content + "\n"
+                    
+                    # Extract financial data
+                    isin_matches = re.finditer(r'([A-Z]{2}[A-Z0-9]{9}\d)', page_text)
+                    for match in isin_matches:
+                        isin = match.group(1)
+                        # Look for associated data near the ISIN
+                        context = page_text[max(0, match.start()-200):min(len(page_text), match.end()+200)]
+                        
+                        # Extract security details
+                        security = {
+                            "isin": isin,
+                            "name": self._extract_security_name(context),
+                            "price": self._extract_price(context),
+                            "quantity": self._extract_quantity(context),
+                            "value": self._extract_value(context),
+                            "currency": self._extract_currency(context)
+                        }
+                        
+                        financial_data["holdings"].append(security)
+                    
+                    extracted_text += page_text
+                    logger.info(f"Extracted text and data from page {getattr(page, 'page_number', 0)}")
+            
+            # Clean up extracted text
+            extracted_text = re.sub(r'!\[img-\d+\.jpeg\]\(img-\d+\.jpeg\)', '', extracted_text)
+            extracted_text = re.sub(r'\n\s*\n', '\n\n', extracted_text)
+            
+            logger.info(f"Total extracted text length: {len(extracted_text)}")
+            logger.info(f"Found {len(financial_data['holdings'])} securities")
+            
+            # Extract tables
+            tables = self._extract_tables(extracted_text)
+            logger.info(f"Extracted {len(tables)} tables")
+            
+            # Extract images
+            images = self._extract_images(ocr_response) if hasattr(ocr_response, 'pages') else []
+            logger.info(f"Extracted {len(images)} images")
+            
+            # Create result structure
+            result = {
+                "metadata": {
+                    "filename": os.path.basename(file_path),
+                    "total_pages": len(ocr_response.pages) if hasattr(ocr_response, 'pages') else 1,
+                    "file_size": os.path.getsize(file_path),
+                    "processed_date": datetime.now().isoformat()
+                },
+                "text": extracted_text,
+                "tables": tables,
+                "images": images,
+                "financial_data": financial_data
+            }
+            
+            # Save the extracted content
+            self.save_extracted_content(result)
+            
+            logger.info(f"Extracted {len(tables)} tables and {len(images)} images")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error in extract_all_content: {str(e)}", exc_info=True)
+            raise
+
+    def _extract_security_name(self, context):
+        """Extract security name from context."""
+        patterns = [
+            r'שם נייר[:\s]+([^\n]+)',
+            r'שם המכשיר[:\s]+([^\n]+)',
+            r'שם המנפיק[:\s]+([^\n]+)'
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, context, re.IGNORECASE | re.MULTILINE)
+            if match:
+                return match.group(1).strip()
+        return None
+
+    def _extract_price(self, context):
+        """Extract price from context."""
+        patterns = [
+            r'מחיר[:\s]+([\d,.]+)',
+            r'שער[:\s]+([\d,.]+)',
+            r'שווי ליחידה[:\s]+([\d,.]+)'
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, context, re.IGNORECASE | re.MULTILINE)
+            if match:
+                try:
+                    return float(match.group(1).replace(',', ''))
+                except ValueError:
+                    continue
+        return None
+
+    def _extract_quantity(self, context):
+        """Extract quantity from context."""
+        patterns = [
+            r'כמות[:\s]+([\d,.]+)',
+            r'יתרה[:\s]+([\d,.]+)',
+            r'מספר יחידות[:\s]+([\d,.]+)'
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, context, re.IGNORECASE | re.MULTILINE)
+            if match:
+                try:
+                    return float(match.group(1).replace(',', ''))
+                except ValueError:
+                    continue
+        return None
+
+    def _extract_value(self, context):
+        """Extract value from context."""
+        patterns = [
+            r'שווי[:\s]+([\d,.]+)',
+            r'שווי שוק[:\s]+([\d,.]+)',
+            r'שווי כולל[:\s]+([\d,.]+)'
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, context, re.IGNORECASE | re.MULTILINE)
+            if match:
+                try:
+                    return float(match.group(1).replace(',', ''))
+                except ValueError:
+                    continue
+        return None
+
+    def _extract_currency(self, context):
+        """Extract currency from context."""
+        patterns = {
+            "ILS": r'₪|ש"ח|שקל|NIS',
+            "USD": r'\$|דולר|USD',
+            "EUR": r'€|אירו|EUR'
+        }
+        for currency, pattern in patterns.items():
+            if re.search(pattern, context, re.IGNORECASE):
+                return currency
+        return "ILS"  # Default to ILS
+
+    def _extract_tables(self, text):
+        """Extract tables from the text content."""
+        tables = []
+        try:
+            # Split text into sections
+            sections = text.split('\n\n')
+            
+            for section in sections:
+                # Look for table-like structures
+                if '|' in section and '-' in section:
+                    # Split into rows
+                    rows = [row.strip() for row in section.split('\n') if row.strip()]
+                    
+                    # Skip if too few rows
+                    if len(rows) < 2:
+                        continue
+                        
+                    # Extract headers
+                    headers = [cell.strip() for cell in rows[0].split('|') if cell.strip()]
+                    
+                    # Skip if no headers
+                    if not headers:
+                        continue
+                    
+                    # Extract data rows
+                    data_rows = []
+                    for row in rows[1:]:
+                        cells = [cell.strip() for cell in row.split('|') if cell.strip()]
+                        if cells and len(cells) == len(headers):
+                            data_rows.append(cells)
+                    
+                    # Only add if we have data
+                    if data_rows:
+                        # Try to identify if this is a holdings table
+                        is_holdings_table = any(header.lower() in ['isin', 'שם נייר', 'מחיר', 'כמות', 'שווי'] for header in headers)
+                        
+                        table = {
+                            "headers": headers,
+                            "data": data_rows,
+                            "type": "holdings" if is_holdings_table else "general"
+                        }
+                        
+                        # If this is a holdings table, extract financial data
+                        if is_holdings_table:
+                            holdings = []
+                            isin_index = -1
+                            name_index = -1
+                            price_index = -1
+                            quantity_index = -1
+                            value_index = -1
+                            
+                            # Find column indices
+                            for i, header in enumerate(headers):
+                                header_lower = header.lower()
+                                if 'isin' in header_lower:
+                                    isin_index = i
+                                elif 'שם' in header_lower or 'נייר' in header_lower:
+                                    name_index = i
+                                elif 'מחיר' in header_lower or 'שער' in header_lower:
+                                    price_index = i
+                                elif 'כמות' in header_lower or 'יחידות' in header_lower:
+                                    quantity_index = i
+                                elif 'שווי' in header_lower:
+                                    value_index = i
+                            
+                            # Extract holdings from each row
+                            for row in data_rows:
+                                holding = {
+                                    "isin": row[isin_index] if isin_index >= 0 and isin_index < len(row) else None,
+                                    "name": row[name_index] if name_index >= 0 and name_index < len(row) else None,
+                                    "price": self._parse_number(row[price_index]) if price_index >= 0 and price_index < len(row) else None,
+                                    "quantity": self._parse_number(row[quantity_index]) if quantity_index >= 0 and quantity_index < len(row) else None,
+                                    "value": self._parse_number(row[value_index]) if value_index >= 0 and value_index < len(row) else None,
+                                    "currency": self._detect_currency_in_row(row)
+                                }
+                                holdings.append(holding)
+                            
+                            table["holdings"] = holdings
+                        
+                        tables.append(table)
+            
+            logger.info(f"Extracted {len(tables)} tables from text")
+            return tables
+            
+        except Exception as e:
+            logger.error(f"Error extracting tables: {str(e)}", exc_info=True)
+            return []
+
+    def _parse_number(self, text):
+        """Parse number from text, handling different formats."""
+        if not text:
             return None
+        try:
+            # Remove currency symbols and other non-numeric characters
+            clean_text = re.sub(r'[^\d.,\-]', '', text)
+            # Replace comma with dot for decimal point
+            clean_text = clean_text.replace(',', '.')
+            # Convert to float
+            return float(clean_text)
+        except (ValueError, TypeError):
+            return None
+
+    def _detect_currency_in_row(self, row):
+        """Detect currency from row values."""
+        row_text = ' '.join(str(cell) for cell in row)
+        currency_patterns = {
+            "ILS": r'₪|ש"ח|שקל|NIS',
+            "USD": r'\$|דולר|USD',
+            "EUR": r'€|אירו|EUR'
+        }
+        for currency, pattern in currency_patterns.items():
+            if re.search(pattern, row_text, re.IGNORECASE):
+                return currency
+        return "ILS"  # Default to ILS
 
     def save_extracted_content(self, content, output_dir="extracted_data"):
         """
@@ -450,31 +664,44 @@ class MistralExtractor:
             
             # Generate timestamp for unique filenames
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            base_filename = os.path.splitext(content['filename'])[0]
+            
+            # Make sure we have a valid filename
+            if 'metadata' in content and 'filename' in content['metadata']:
+                base_filename = os.path.splitext(content['metadata']['filename'])[0]
+            else:
+                base_filename = f"document_{timestamp}"
+                logger.warning(f"No filename found in content, using generated name: {base_filename}")
             
             # Save full content
             output_file = os.path.join(output_dir, f"{base_filename}_{timestamp}_full.json")
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(content, f, ensure_ascii=False, indent=2)
             
+            logger.info(f"Saved full content to {output_file}")
+            
             # Save tables separately
-            if content["tables"]:
+            if "tables" in content and content["tables"]:
                 tables_file = os.path.join(output_dir, f"{base_filename}_{timestamp}_tables.json")
                 with open(tables_file, 'w', encoding='utf-8') as f:
                     json.dump(content["tables"], f, ensure_ascii=False, indent=2)
+                logger.info(f"Saved tables to {tables_file}")
             
             # Save text separately
-            text_file = os.path.join(output_dir, f"{base_filename}_{timestamp}_text.txt")
-            with open(text_file, 'w', encoding='utf-8') as f:
-                f.write(content["text"])
+            if "text" in content and content["text"]:
+                text_file = os.path.join(output_dir, f"{base_filename}_{timestamp}_text.txt")
+                with open(text_file, 'w', encoding='utf-8') as f:
+                    f.write(content["text"])
+                logger.info(f"Saved text to {text_file}")
             
             # Save images data separately
-            if content["images"]:
+            if "images" in content and content["images"]:
                 images_file = os.path.join(output_dir, f"{base_filename}_{timestamp}_images.json")
                 with open(images_file, 'w', encoding='utf-8') as f:
                     json.dump(content["images"], f, ensure_ascii=False, indent=2)
+                logger.info(f"Saved images data to {images_file}")
             
-            logger.info(f"Saved extracted content to {output_dir}")
+            logger.info(f"Saved all extracted content to {output_dir}")
+            return output_file
             
         except Exception as e:
             logger.error(f"Error saving extracted content: {str(e)}", exc_info=True)

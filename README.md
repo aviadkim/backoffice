@@ -1,67 +1,79 @@
-# FinAnalyzer
+# Backoffice - מערכת לניהול מסמכים פיננסיים
 
-A powerful financial document analysis tool that uses cloud services for OCR and text extraction.
+מערכת לעיבוד מסמכים פיננסיים, חילוץ נתונים ומידע מקבצי PDF ויצירת דוחות.
 
-## Features
+## גרסה 3.6.0 - חדש!
 
-- Upload and analyze bank statements and securities reports
-- Extract text and tables from PDF documents using Google Cloud Vision API
-- Process securities information with AI-powered analysis
-- Generate reports and visualizations
-- Smart bot for financial insights
+**שיפורים עיקריים:**
+- ✅ טיפול משופר בקבצים ומניעת אובדן נתונים
+- ✅ חילוץ אוטומטי של מבנים פיננסיים מורכבים (טבלאות אחזקות, נתוני ניירות ערך)
+- ✅ תמיכה בפורמטים רבים יותר של קבצי PDF
+- ✅ תצוגה משופרת של תוצאות ונתונים
 
-## Prerequisites
+[פרטים נוספים על החידושים בגרסה](./RELEASE_NOTES.md)
 
-- Python 3.8 or higher
-- Google Cloud account with Vision API enabled
-- Gemini API key
+## תכונות עיקריות
 
-## Installation
+- **עיבוד קבצי PDF**: המרת קבצי PDF למידע טקסטואלי מובנה
+- **חילוץ טבלאות**: זיהוי אוטומטי והמרה של טבלאות מסמך לפורמט דיגיטלי
+- **חילוץ תמונות**: זיהוי ותהליך OCR על תמונות בתוך מסמכים לחילוץ נתונים
+- **זיהוי מבני נתונים**: זיהוי מבנים פיננסיים ייחודיים כגון אחזקות ניירות ערך
+- **ממשק משתמש אינטואיטיבי**: ממשק נוח להעלאת מסמכים וצפייה בתוצאות
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/finanalyzer.git
-cd finanalyzer
+## התקנה והפעלה
+
+### דרישות מערכת
+- Python 3.8 ומעלה
+- Flask
+- mistralai API key
+
+### התקנה
+
+1. שכפל את המאגר:
+   ```
+   git clone https://github.com/aviadkim/backoffice.git
+   cd backoffice
+   ```
+
+2. התקן את החבילות הנדרשות:
+   ```
+   pip install -r requirements.txt
+   ```
+
+3. הגדר את ה-API key של Mistral:
+   - צור קובץ `.env` בתיקיית הפרויקט
+   - הוסף את השורה הבאה עם המפתח שלך:
+     ```
+     MISTRAL_API_KEY=your_mistral_api_key_here
+     ```
+
+### הפעלה
+
+הפעל את השרת:
+```
+python app.py
 ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
+גש לאפליקציה בדפדפן בכתובת:
+```
+http://127.0.0.1:5000
 ```
 
-3. Set up Google Cloud credentials:
-   - Create a Google Cloud project
-   - Enable the Vision API
-   - Create a service account and download the credentials JSON file
-   - Place the credentials file in a secure location
-   - Update the `GOOGLE_APPLICATION_CREDENTIALS` path in `.env`
+## שימוש
 
-4. Set up Gemini API:
-   - Get a Gemini API key from Google AI Studio
-   - Update the `GEMINI_API_KEY` in `.env`
+1. בדף הראשי, לחץ על "בחר קובץ" כדי לבחור קובץ PDF
+2. לחץ על "העלה וסרוק" להתחלת עיבוד המסמך
+3. המערכת תעבד את המסמך ותציג את התוצאות בחלוקה לקטגוריות:
+   - אחזקות - טבלאות אחזקות ונתוני ניירות ערך שזוהו
+   - טקסט - הטקסט המלא שחולץ מהמסמך
+   - טבלאות - טבלאות שזוהו במסמך בפורמט מובנה
+   - תמונות - תמונות שזוהו במסמך וטקסט שחולץ מהן
 
-## Usage
+## תיעוד נוסף
 
-1. Start the application:
-```bash
-python -m streamlit run app.py
-```
+- [הערות שחרור](./RELEASE_NOTES.md)
+- [יומן שינויים](./CHANGELOG.md)
 
-2. Open your browser and navigate to `http://localhost:8501`
+## רישיון
 
-3. Upload your financial documents and start analyzing!
-
-## Configuration
-
-The application can be configured through the following files:
-
-- `.env`: Environment variables for API keys and credentials
-- `.streamlit/config.toml`: Streamlit configuration
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License

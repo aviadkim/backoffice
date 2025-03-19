@@ -1,0 +1,49 @@
+# Backoffice Financial Analysis System v1.6.0
+
+## Features
+- PDF document processing (securities reports, bank statements, performance reports)
+- Financial data extraction and analysis
+- Transaction categorization
+- Budget tracking and alerts
+- Consolidated financial reporting
+- Excel export with multiple sheets
+- Financial visualizations (charts and graphs)
+- Multi-language support (English/Hebrew)
+
+## Recent Updates
+- Added Excel export functionality with multiple sheets
+- Added financial visualizations (spending by category, monthly trends, income vs expenses)
+- Enhanced transaction categorization
+- Improved error handling and logging
+- Added budget alerts system
+- Added performance tracking
+
+## Installation
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+1. Place your PDF documents in the `samples` directory
+2. Run the consolidated report generator:
+```bash
+python examples/generate_consolidated_report.py
+```
+
+## Output Files
+- `samples/consolidated_report.md` - Detailed markdown report
+- `samples/financial_report.xlsx` - Excel report with multiple sheets
+- `samples/visualizations/` - Directory containing financial charts
+
+## Dependencies
+- pandas
+- numpy
+- matplotlib
+- seaborn
+- openpyxl
+- scikit-learn
+- pdfplumber
+- fpdf2
+
+## License
+MIT License 

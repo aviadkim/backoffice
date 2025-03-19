@@ -1,0 +1,22 @@
+document_type: statement
+fields:
+- field_type: string
+  name: security_name
+  patterns:
+  - (?:security|bond|stock|fund|etf|share)[\s:]+([A-Za-z0-9\s.,&\'-]+)
+  - ([A-Za-z0-9\s.,&\'-]{3,50})\s+[A-Z]{2}[A-Z0-9]{10}
+  required: true
+  validation_rules: []
+- field_type: string
+  name: isin
+  patterns:
+  - '[A-Z]{2}[A-Z0-9]{10}'
+  required: true
+  validation_rules: []
+institution: Generic Bank
+layout_markers: {}
+name: generic_bank_template
+sample_identifiers:
+- statement
+- portfolio
+- securities

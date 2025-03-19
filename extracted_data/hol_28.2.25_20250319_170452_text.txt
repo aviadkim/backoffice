@@ -1,0 +1,54 @@
+# Cormer 
+
+## Valuation
+
+as of 28.02.2025
+![img-0.jpeg](img-0.jpeg)
+![img-1.jpeg](img-1.jpeg)
+![img-2.jpeg](img-2.jpeg)
+![img-3.jpeg](img-3.jpeg)
+![img-4.jpeg](img-4.jpeg)
+![img-5.jpeg](img-5.jpeg)
+![img-6.jpeg](img-6.jpeg)
+![img-7.jpeg](img-7.jpeg)
+![img-8.jpeg](img-8.jpeg)
+![img-9.jpeg](img-9.jpeg)
+![img-10.jpeg](img-10.jpeg)
+![img-11.jpeg](img-11.jpeg)
+![img-12.jpeg](img-12.jpeg)
+![img-13.jpeg](img-13.jpeg)
+![img-14.jpeg](img-14.jpeg)
+![img-15.jpeg](img-15.jpeg)
+![img-16.jpeg](img-16.jpeg)
+![img-17.jpeg](img-17.jpeg)
+![img-18.jpeg](img-18.jpeg)
+![img-19.jpeg](img-19.jpeg)
+# Product Risk Classifier (PRC) 
+
+The PRC (Product Risk Classifier) is a risk indicator, provided by third parties, which is based on quantitative models. This provides an indication of the financial risk of the individual investment products and therefore allows comparing the financial risk of financial instruments belonging to various asset categories and classes.
+This value is calculated by taking into consideration the three basis aspects of an investment product's financial risk: the market risk, credit risk and liquidity risk.
+The Portfolio Risk Classifer (PRC) is measured on a scale that goes from 1 (very low risk) to 5 (very high risk).
+
+## Performance
+
+Performance is the percentage trend in asset value and therefore expresses the return on a securities portfolio over a given period of time. The performance indicator is expressed as "Total Return". In fact, the calculation takes not only price gains/losses into account but also interest (including pro rata interest) and dividend payments.
+The Bank calculates performance using the TWR (Time-Weighted Return) calculation method, which measures the compound rate of return on a portfolio, eliminating the impact of any cash flows made by the investor (deposits or withdrawals).
+Performance is stated net, i.e. performance net of taxes and of transaction and management fees.
+The asset valuation reports the information available at the time of preparation of the asset valuation for the relevant valuation date.
+# Notices and other information 
+
+## Solutions and prices
+
+The present valuation is for information purposes only. The valuation of the assets in this statement is based on the prices and exchange rates derived from commonly used information sources in the banking sector that the Bank considers to be reliable.
+The stated prices and exchange rates are merely indicative and by no means binding on the Bank; they do not necessarily reflect the amounts actually attainable through market trading. Positions marked "price to be verified" refer to instruments that are illiquid or for which no price and/or updated price can be obtained from an official source.
+The data set forth in the asset valuation - even if they refer to the same valuation date but are generated at different times - may differ from one another due to transactions and/or adjustments, particularly value adjustments, that have been recorded in the meantime with a retroactive effect or value date.
+The Bank in no way guarantees the accuracy or completeness of the present valuation, the information contained herewith or the calculations related to the assets held in custody.
+The Bank disclaims all liability for any loss or damage connected with use of the valuation and related information.
+This document is neither designed nor suitable for tax purposes.
+Any discrepancies or objections shall be reported to the Bank in writing within 30 days. Otherwise, the contents of this document will be deemed accepted.
+
+## Excluded information
+
+The present asset valuation does not include liabilities from bills of exchange, acceptances and deeds of pledge, documentary credits, trust loans, sureties, guarantees, other forms of contingent liabilities or outstanding transactions.
+
+Your financial advisor will be happy to answer any questions you may have about the terms and positions set forth in the present statement.

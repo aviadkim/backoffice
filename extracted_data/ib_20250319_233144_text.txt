@@ -1,0 +1,50 @@
+# PortfolioAnalyst 
+
+## InteractiveBrokers
+
+Top Performers
+
+| Symbol | Value | Contribution (\%) |
+| :-- | --: | --: |
+| QQQ | $7,339,757.32$ | 14.73 |
+| VOO | $7,306,017.74$ | 10.85 |
+| QUAL | $5,067,363.84$ | 7.11 |
+| DGRO | $5,951,718.02$ | 6.09 |
+| USAN | $5,723,249.84$ | 5.53 |
+
+# Contribution by Sector 
+
+|  | Broad | $70.63 \%$ | Technology | $-0.39 \%$ |
+| :--: | :--: | :--: | :--: | :--: |
+|  | Unclassified | 2.77\% |  |  |
+|  | Consumer Non-Cyc | 0.95\% |  |  |
+|  | Real Estate | 0.72\% |  |  |
+|  | Government | 0.48\% |  |  |
+|  | Consumer Cyclicals | 0.48\% |  |  |
+|  | Cash | 0.43\% |  |  |
+|  | Healthcare | 0.24\% |  |  |
+
+# Notes and Disclosure 
+
+1. The Net Asset Value (NAV) consists of all positions by financial instrument (stock, securities options, warrants, bonds, cash, etc.). All non-base currency amounts are converted to the base currency at the close of period rate.
+2. The deposit/withdrawal amount displayed in the Account Overview report includes internal transfers along with cash and position transfers.
+3. The gain or loss for future contracts settle into cash each night. The notional value is used when computing the contribution to return.
+4. Dividend accruals, interest accruals and insured deposits are included in cash amounts throughout the report.
+5. Price valuations are obtained from outside parties. Interactive Brokers shall have no responsibility for the accuracy or timeliness of any such price valuation.
+6. Data from Thomson Reuters Business Classifications and Lipper Global is used to derive our sector classifications. Funds with assorted sector allocations are classified as Broad.
+7. Amounts are formatted to two decimal places. If amounts are greater than two decimal places, Interactive Brokers uses "half-even" rounding. This means that Interactive Brokers rounds such amounts up to the nearest even number.
+8. Historical US 3 Month Treasury Bill rates are used as the risk free rates when calculating Alpha ( $\alpha$ ), the Sharpe ratio, the Sortino ratio, and the downside deviation.
+9. The mean return is the average TWR for the period.
+10. Frongello is the method used for mathematical smoothing in the Performance Attribution report. It has been developed by Andrew Scott Bay Frongello.
+11. The Performance Attribution report is available from 2019 on.
+12. For accounts opened and funded before 2009, reports with a time period of Since Inception will include data going back to January 1, 2009. This includes some default reports and both Historical Performance reports.
+13. The Modified Dietz method is used to calculate MWR. This method only values the portfolio at the start and end of the period and weights the cash flows. When large flows occur, its accuracy can diminish.
+14. The Estimated Annual Income and Estimated Remaining Income in the Projected Income report assume dividend and bond payments remain constant throughout the year. These positions and interest rates are based on the previous business day.
+15. If you have elected to trade cryptocurrency/digital asset products at Crypto Provider through the Interactive Brokers platform, for your convenience your positions in your linked account at Crypto Provider are reflected in PortfolioAnalyst in connection with your Interactive Brokers account.
+16. The benchmarks included in this report are SPXTR (S\&P 500 TR Index in USD), EFA ((Shares MSCI EAFE Index in USD), VT (Vanguard Total World Stock Index ETF in USD), and S\&P 500 (S\&P 500 in USD).
+
+## IMPORTANT NOTE:
+
+This portfolio analysis was generated using Interactive Brokers' PortfolioAnalyst tool, which allows Interactive Brokers clients to generate analyses of their accounts using market data provided by third parties along with trade and account data contained in Interactive Brokers' systems. This analysis is for information purposes only and is provided AS IS. Interactive Brokers makes no warranty of any kind, express or implied, as to this report analysis and its contents. The data provided for use in this Portfolio Analysis is believed to be accurate but completeness and accuracy of the information is not guaranteed, and Interactive Brokers has no liability with respect thereto. The data regarding accounts held outside of Interactive Brokers is obtained either directly from you or from the financial institutions holding those accounts through a third-party service provider and Interactive Brokers has not reviewed its accuracy.
+
+This material in this analysis is intended only as a reference and should not be relied upon for the maintenance of your books and records for tax, accounting, financial, or regulatory reporting or for any other purposes. This analysis is not an offer or a solicitation of an offer to buy or sell any security. This material does not and is not intended to take into account the particular financial conditions, investment objectives or requirements of individual customers. Before acting on this material, you should consider whether it is suitable for your particular circumstances and, as necessary, seek professional advice.

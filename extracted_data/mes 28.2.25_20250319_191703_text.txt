@@ -1,0 +1,47 @@
+#  
+
+# Expected Cash Flows (Overview) 
+
+Next 12 months
+
+|  | At night | 03 2025 | 04 2025 | 05 2025 | 06 2025 | 07 2025 | 08 2025 | 09 2025 | 10 2025 | 11 2025 | 12 2025 | 01 2026 | 02 2026 |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| USD | 47'850 | 9'846 | 92'801 | 31'960 | 145'005 |  |  | 100'579 |  |  | 37'950 | 2'500 | 5'311 | 12'306 |
+| Total USD | 47'850 | 9'846 | 92'801 | 31'960 | 145'005 |  |  | 100'579 |  |  | 37'950 | 2'500 | 5'311 | 12'306 |
+
+Next years
+
+|  | 2025 | 2026 | 2027 | 2028 | 2029 | Others | Total in currency | Weight in \% |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| USD | 420'641 | 285'962 | 465'345 | 2'995'285 | 2'135'285 | 10'494'166 | 16'796'684 | 100.00\% |
+| Total USD | 420'641 | 285'962 | 465'345 | 2'995'285 | 2'135'285 | 10'494'166 | 16'796'684 | 100.00\% |
+
+# Product Risk Classifier (PRC) 
+
+The PRC (Product Risk Classifier) is a risk indicator, provided by third parties, which is based on quantitative models. This provides an indication of the financial risk of the individual investment products and therefore allows comparing the financial risk of financial instruments belonging to various asset categories and classes.
+This value is calculated by taking into consideration the three basis aspects of an investment product's financial risk: the market risk, credit risk and liquidity risk.
+The Portfolio Risk Classifer (PRC) is measured on a scale that goes from 1 (very low risk) to 5 (very high risk).
+
+## Performance
+
+Performance is the percentage trend in asset value and therefore expresses the return on a securities portfolio over a given period of time. The performance indicator is expressed as "Total Return". In fact, the calculation takes not only price gains/losses into account but also interest (including pro rata interest) and dividend payments.
+The Bank calculates performance using the TWR (Time-Weighted Return) calculation method, which measures the compound rate of return on a portfolio, eliminating the impact of any cash flows made by the investor (deposits or withdrawals).
+Performance is stated net, i.e. performance net of taxes and of transaction and management fees.
+The asset valuation reports the information available at the time of preparation of the asset valuation for the relevant valuation date.
+# Notices and other information 
+
+## Solutions and prices
+
+The present valuation is for information purposes only. The valuation of the assets in this statement is based on the prices and exchange rates derived from commonly used information sources in the banking sector that the Bank considers to be reliable.
+The stated prices and exchange rates are merely indicative and by no means binding on the Bank; they do not necessarily reflect the amounts actually attainable through market trading. Positions marked "price to be verified" refer to instruments that are illiquid or for which no price and/or updated price can be obtained from an official source.
+The data set forth in the asset valuation - even if they refer to the same valuation date but are generated at different times - may differ from one another due to transactions and/or adjustments, particularly value adjustments, that have been recorded in the meantime with a retroactive effect or value date.
+The Bank in no way guarantees the accuracy or completeness of the present valuation, the information contained herewith or the calculations related to the assets held in custody.
+The Bank disclaims all liability for any loss or damage connected with use of the valuation and related information.
+This document is neither designed nor suitable for tax purposes.
+Any discrepancies or objections shall be reported to the Bank in writing within 30 days. Otherwise, the contents of this document will be deemed accepted.
+
+## Excluded information
+
+The present asset valuation does not include liabilities from bills of exchange, acceptances and deeds of pledge, documentary credits, trust loans, sureties, guarantees, other forms of contingent liabilities or outstanding transactions.
+
+Your financial advisor will be happy to answer any questions you may have about the terms and positions set forth in the present statement.

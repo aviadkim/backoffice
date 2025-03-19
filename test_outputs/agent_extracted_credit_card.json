@@ -1,0 +1,92 @@
+[
+    {
+        "date": "05/17/2023",
+        "description": "Supermarket",
+        "amount": -210.5,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "05/20/2023",
+        "description": "Gas Station",
+        "amount": -85.75,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "05/22/2023",
+        "description": "Online Subscription",
+        "amount": -14.99,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "05/25/2023",
+        "description": "Department Store",
+        "amount": -350.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "05/30/2023",
+        "description": "Airline Tickets",
+        "amount": -1200.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/02/2023",
+        "description": "Restaurant",
+        "amount": -95.6,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/05/2023",
+        "description": "Pharmacy",
+        "amount": -62.3,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/10/2023",
+        "description": "Electronics",
+        "amount": -899.99,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/12/2023",
+        "description": "Payment Thank You",
+        "amount": 2000.0,
+        "category": "הכנסה"
+    },
+    {
+        "date": "",
+        "description": "Previous Balance:",
+        "amount": 1450.0,
+        "category": "הכנסה"
+    },
+    {
+        "date": "",
+        "description": "Payments:",
+        "amount": -2000.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "",
+        "description": "Purchases:",
+        "amount": 2919.13,
+        "category": "הכנסה"
+    },
+    {
+        "date": "",
+        "description": "Fees and Interest:",
+        "amount": 35.25,
+        "category": "הכנסה"
+    },
+    {
+        "date": "",
+        "description": "Current Balance:",
+        "amount": 2404.38,
+        "category": "הכנסה"
+    },
+    {
+        "date": "",
+        "description": "Minimum Payment Due:",
+        "amount": 75.0,
+        "category": "הכנסה"
+    }
+]

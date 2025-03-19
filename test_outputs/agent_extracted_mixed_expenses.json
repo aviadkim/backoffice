@@ -1,0 +1,134 @@
+[
+    {
+        "date": "06/03/2023",
+        "description": "- Grocery Shopping",
+        "amount": -325.45,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/03/2023",
+        "description": "- Children's Clothing",
+        "amount": -189.99,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/05/2023",
+        "description": "- Restaurant Dinner",
+        "amount": -152.3,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/07/2023",
+        "description": "- Gasoline",
+        "amount": -78.5,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/10/2023",
+        "description": "- Home Repairs",
+        "amount": -412.75,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/10/2023",
+        "description": "- Grocery Shopping",
+        "amount": -255.6,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/12/2023",
+        "description": "- Doctor Visit",
+        "amount": -150.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/14/2023",
+        "description": "- School Supplies",
+        "amount": -95.25,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/17/2023",
+        "description": "- Grocery Shopping",
+        "amount": -301.2,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/18/2023",
+        "description": "- Movie Night",
+        "amount": -65.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/19/2023",
+        "description": "- Car Maintenance",
+        "amount": -220.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/24/2023",
+        "description": "- Grocery Shopping",
+        "amount": -278.9,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/25/2023",
+        "description": "- Birthday Party",
+        "amount": -175.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/27/2023",
+        "description": "- Utility Bills",
+        "amount": -345.65,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/30/2023",
+        "description": "- Monthly Gym Fee",
+        "amount": -80.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/01/2023",
+        "description": "- Salary Deposit",
+        "amount": 5400.0,
+        "category": "הכנסה"
+    },
+    {
+        "date": "06/15/2023",
+        "description": "- Freelance Work",
+        "amount": 850.0,
+        "category": "הכנסה"
+    },
+    {
+        "date": "06/30/2023",
+        "description": "- Dividends",
+        "amount": 125.5,
+        "category": "הכנסה"
+    },
+    {
+        "date": "06/01/2023",
+        "description": "- Mortgage Payment",
+        "amount": -1950.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/01/2023",
+        "description": "- Car Loan",
+        "amount": -425.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/05/2023",
+        "description": "- Insurance",
+        "amount": -320.0,
+        "category": "לא מסווג"
+    },
+    {
+        "date": "06/10/2023",
+        "description": "- Internet and Phone",
+        "amount": -180.0,
+        "category": "לא מסווג"
+    }
+]
